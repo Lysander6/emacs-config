@@ -18,6 +18,10 @@
 (menu-bar-mode -1)
 (tool-bar-mode -1)
 
+; smoother scrolling
+(setq-default scroll-margin 4)
+(setq-default scroll-step 1)
+
 (load-theme 'modus-vivendi)
 
 ; enable line numbers in prog and text modes
