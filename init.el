@@ -2,6 +2,14 @@
 
 ; `M-x eval-buffer` or `M-x load-file` to reload this file
 
+; temporarily "disable" garbage collection to speed-up startup
+(setq gc-cons-threshold most-positive-fixnum)
+(setq gc-cons-percentage 1.0)
+(add-hook 'emacs-startup-hook
+	  (defun set-proper-gc-values ()
+	    (setq gc-cons-threshold 100000000)
+	    (setq gc-cons-percentage 0.1)))
+
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (load custom-file)
 
