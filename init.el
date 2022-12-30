@@ -14,6 +14,10 @@
 ; use y/n in place of yes/no
 (setq-default use-short-answers t)
 
+; always start with empty scratch buffer
+(setq-default initial-buffer-choice t)
+(setq-default initial-scratch-message "")
+
 ; disable menu and toolbar
 (menu-bar-mode -1)
 (tool-bar-mode -1)
