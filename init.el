@@ -1,4 +1,4 @@
-;; -*- coding: utf-8; no-byte-compile: t -*-
+;; -*- coding: utf-8; no-byte-compile: t; lexical-binding: t; -*-
 
 ; `M-x eval-buffer` or `M-x load-file` to reload this file
 
@@ -15,7 +15,6 @@
 (setq-default use-short-answers t)
 
 ; always start with empty scratch buffer
-(setq-default initial-buffer-choice t)
 (setq-default initial-scratch-message "")
 
 ; disable menu and toolbar
@@ -37,7 +36,7 @@
 
 ; use seamless vertical window divider
 (defun change-window-divider ()
-  (let ((display-table (or buffer-display-table standard-display-table)))
+  (let ((display-table (or buffer-display-table standard-display-table (make-display-table))))
     (set-display-table-slot display-table 5 ?│)
     (set-window-display-table (selected-window) display-table)))
 
@@ -55,16 +54,17 @@
 
 ; enable mouse support in terminal
 (use-package xt-mouse
-  :config (xterm-mouse-mode))
+  :hook (after-init . xterm-mouse-mode))
 
 ; enable window change undo/redo
 (use-package winner
-  :config (winner-mode))
+  :hook (after-init . winner-mode))
 
 ; enable spell checking (`M-$` to correct a word)
 (use-package flyspell
-  :defer t
-  :custom (flyspell-default-dictionary "en_GB")
+  :custom
+  (flyspell-default-dictionary "en_GB")
+  (flyspell-issue-welcome-flag nil)
   :hook ((text-mode . flyspell-mode)
 	 (prog-mode . flyspell-prog-mode)))
 
