@@ -16,6 +16,8 @@
  case-fold-search nil
  create-lockfiles nil)
 
+(load-theme 'modus-vivendi)
+
 ; enable mouse support in terminal
 (use-package xt-mouse
   :config (xterm-mouse-mode))
