@@ -2,19 +2,34 @@
 
 ; `M-x eval-buffer` or `M-x load-file` to reload this file
 
-(require 'package)
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
-(package-initialize t)
-
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (load custom-file)
 
-(setq-default
- ; make search case insensitive
- case-fold-search nil
- create-lockfiles nil)
+; make search case insensitive
+(setq-default case-fold-search t)
+
+; do not create lock files
+(setq-default create-lockfiles nil)
+
+; use y/n in place of yes/no
+(setq-default use-short-answers t)
+
+; disable menu and toolbar
+(menu-bar-mode -1)
+(tool-bar-mode -1)
 
 (load-theme 'modus-vivendi)
+
+; enable line numbers in prog and text modes
+(defun display-line-numbers-hook ()
+  (setq display-line-numbers t))
+
+(add-hook 'prog-mode-hook 'display-line-numbers-hook)
+(add-hook 'text-mode-hook 'display-line-numbers-hook)
+
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(package-initialize t)
 
 (require 'use-package)
 
