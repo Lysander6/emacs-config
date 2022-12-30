@@ -1,11 +1,13 @@
 ;; -*- coding: utf-8; no-byte-compile: t -*-
 
+; `M-x eval-buffer` or `M-x load-file` to reload this file
+
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(package-initialize t)
+
 (require 'use-package)
 
-; (package-initialize t)
-
-
-; `M-x eval-buffer` or `M-x load-file` to reload this file
 
 ; make search case insensitive
 (setq-default
@@ -27,5 +29,3 @@
   (flyspell-default-dictionary "en_GB")
   :hook ((text-mode . flyspell-mode)
 	 (prog-mode . flyspell-prog-mode)))
-
-(message "Hello, World!")
