@@ -31,6 +31,18 @@
 (add-hook 'prog-mode-hook 'display-line-numbers-hook)
 (add-hook 'text-mode-hook 'display-line-numbers-hook)
 
+; use seamless vertical window divider
+(defun change-window-divider ()
+  (let ((display-table (or buffer-display-table standard-display-table)))
+    (set-display-table-slot display-table 5 ?│)
+    (set-window-display-table (selected-window) display-table)))
+
+(add-hook 'window-configuration-change-hook 'change-window-divider)
+
+; adjust vertical divider and line numbers colours
+(set-face-foreground 'vertical-border (face-background 'line-number))
+(set-face-background 'line-number "#000000")
+
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 (package-initialize t)
