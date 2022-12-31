@@ -117,6 +117,9 @@
     (kbd "<leader>TAB") '(lambda () (interactive) (switch-to-buffer nil))
     (kbd "<leader>bb") 'switch-to-buffer
 
+    ;; commands
+    (kbd "<leader>:") 'execute-extended-command
+
     ;; commenting
     (kbd "<leader>; ;") 'comment-line
 
@@ -195,3 +198,9 @@
 (use-package marginalia
   :ensure t
   :init (marginalia-mode))
+
+;; (use-package consult
+;;   :ensure t
+;;   :bind
+;;   (("<leader>bb" . consult-buffer))
+;;   :hook (completion-list-mode . consult-preview-at-point-mode))
