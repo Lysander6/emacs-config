@@ -19,9 +19,6 @@
 (setq-default read-file-name-completion-ignore-case t)
 (setq-default read-buffer-completion-ignore-case t)
 
-;; more sensible set of completion styles
-(setq-default completion-styles '(flex initials partial-completion basic))
-
 ; do not create lock files
 (setq-default create-lockfiles nil)
 
@@ -188,3 +185,9 @@
   :ensure t
   :pin gnu ;; not available on MELPA
   :init (vertico-mode))
+
+(use-package orderless
+  :ensure t
+  :custom
+  (completion-styles '(orderless basic))
+  (completion-category-overrides '((file (styles basic partial-completion)))))
