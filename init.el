@@ -72,18 +72,20 @@
   :after evil
   :hook (after-init . winner-mode)
   :config
-  (evil-define-key 'normal 'global (kbd "<leader>wu") 'winner-undo)
-  (evil-define-key 'normal 'global (kbd "<leader>wU") 'winner-redo))
+  (evil-define-key 'normal 'global
+    (kbd "<leader>wu") 'winner-undo
+    (kbd "<leader>wU") 'winner-redo))
 
 ; movement between windows with direction keys
 (use-package windmove
   :after evil
   :hook (after-init . windmove-mode)
   :config
-  (evil-define-key 'normal 'global (kbd "<leader>wk") 'windmove-up)
-  (evil-define-key 'normal 'global (kbd "<leader>wj") 'windmove-down)
-  (evil-define-key 'normal 'global (kbd "<leader>wh") 'windmove-left)
-  (evil-define-key 'normal 'global (kbd "<leader>wl") 'windmove-right))
+  (evil-define-key 'normal 'global
+    (kbd "<leader>wk") 'windmove-up
+    (kbd "<leader>wj") 'windmove-down
+    (kbd "<leader>wh") 'windmove-left
+    (kbd "<leader>wl") 'windmove-right))
 
 ; enable spell checking (`M-$` to correct a word)
 (use-package flyspell
@@ -100,23 +102,30 @@
   (setq evil-want-keybinding nil)
   :config
   (evil-mode 1)
+
+  ;; set leader and local leader
   (evil-set-leader nil (kbd "M-SPC"))
   (evil-set-leader 'normal (kbd "SPC"))
   (evil-set-leader 'normal (kbd ",") t)
 
-  ; buffers
-  (evil-define-key 'normal 'global (kbd "<leader>fs") 'save-buffer)
+  (evil-define-key 'normal 'global
+    ;; buffers
+    (kbd "<leader>bd") '(lambda () (interactive) (kill-buffer nil))
+    (kbd "<leader>TAB") '(lambda () (interactive) (switch-to-buffer nil))
 
-  ; windows
-  (evil-define-key 'normal 'global (kbd "<leader>wd") 'delete-window)
-  (evil-define-key 'normal 'global (kbd "<leader>wm") 'delete-other-windows)
-  (evil-define-key 'normal 'global (kbd "<leader>w1") 'delete-other-windows)
-  (evil-define-key 'normal 'global (kbd "<leader>ws") 'split-window-below)
-  (evil-define-key 'normal 'global (kbd "<leader>wv") 'split-window-right)
-  (evil-define-key 'normal 'global (kbd "<leader>w=") 'balance-windows)
+    ;; files
+    (kbd "<leader>fs") 'save-buffer)
 
-  ; quitting
-  (evil-define-key 'normal 'global (kbd "<leader>qq") 'save-buffers-kill-terminal))
+    ;; windows
+    (kbd "<leader>wd") 'delete-window
+    (kbd "<leader>wm") 'delete-other-windows
+    (kbd "<leader>w1") 'delete-other-windows
+    (kbd "<leader>ws") 'split-window-below
+    (kbd "<leader>wv") 'split-window-right
+    (kbd "<leader>w=") 'balance-windows
+
+    ;; quitting
+    (kbd "<leader>qq") 'save-buffers-kill-terminal)
 
 (use-package evil-collection
   :after evil
