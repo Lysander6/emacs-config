@@ -127,6 +127,10 @@
     (kbd "<leader>wv") 'split-window-right
     (kbd "<leader>w=") 'balance-windows
 
+    ;; other windows
+    (kbd "M-<up>") '(lambda () (interactive) (scroll-other-window -1))
+    (kbd "M-<down>") '(lambda () (interactive) (scroll-other-window 1))
+
     ;; quitting
     (kbd "<leader>qq") 'save-buffers-kill-terminal)
 
