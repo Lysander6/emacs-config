@@ -58,6 +58,8 @@
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 (package-initialize t)
 
+; use MELPA archive (repository) as default
+(setq-default use-package-always-pin "melpa")
 ; call `package-autoremove` to remove unused packages
 (require 'use-package)
 
@@ -93,7 +95,6 @@
 
 (use-package evil
   :ensure t
-  :pin "melpa"
   :init
   (setq evil-want-integration t)
   (setq evil-want-keybinding nil)
@@ -120,25 +121,20 @@
 (use-package evil-collection
   :after evil
   :ensure t
-  :pin "melpa"
   :config (evil-collection-init))
 
 (use-package magit
   :after evil
-  ;:defer t
   :ensure t
-  :pin "melpa"
   :bind (("<leader>gs" . magit-status)))
 
 (use-package spaceline
   :ensure t
-  :pin "melpa"
   :hook (after-init . spaceline-spacemacs-theme))
 
 (use-package winum
   :after evil
   :ensure t
-  :pin "melpa"
   :config
   ; bindings go here (instead of `:keymap` or `:bind` because plugin
   ; must be active anyway to give windows their numbers
