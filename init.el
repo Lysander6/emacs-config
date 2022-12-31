@@ -112,12 +112,14 @@
     ;; buffers
     (kbd "<leader>bd") '(lambda () (interactive) (kill-buffer nil))
     (kbd "<leader>TAB") '(lambda () (interactive) (switch-to-buffer nil))
+    (kbd "<leader>bb") 'switch-to-buffer
 
     ;; commenting
     (kbd "<leader>; ;") 'comment-line
 
     ;; files
     (kbd "<leader>fs") 'save-buffer
+    (kbd "<leader>ff") 'find-file
 
     ;; windows
     (kbd "<leader>wd") 'delete-window
@@ -175,3 +177,8 @@
 (use-package editorconfig
   :ensure t
   :hook (text-mode prog-mode))
+
+(use-package vertico
+  :ensure t
+  :pin gnu ;; not available on MELPA
+  :init (vertico-mode))
