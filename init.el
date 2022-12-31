@@ -13,8 +13,14 @@
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (load custom-file)
 
-; make search case insensitive
+;; make search and filters case insensitive
 (setq-default case-fold-search t)
+(setq-default completion-ignore-case t)
+(setq-default read-file-name-completion-ignore-case t)
+(setq-default read-buffer-completion-ignore-case t)
+
+;; more sensible set of completion styles
+(setq-default completion-styles '(flex initials partial-completion basic))
 
 ; do not create lock files
 (setq-default create-lockfiles nil)
