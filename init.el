@@ -135,20 +135,18 @@
 (use-package winum
   :after evil
   :ensure t
-  :config
-  ; bindings go here (instead of `:keymap` or `:bind` because plugin
-  ; must be active anyway to give windows their numbers
-  (evil-define-key 'normal 'global (kbd "<leader>1") 'winum-select-window-1)
-  (evil-define-key 'normal 'global (kbd "<leader>2") 'winum-select-window-2)
-  (evil-define-key 'normal 'global (kbd "<leader>3") 'winum-select-window-3)
-  (evil-define-key 'normal 'global (kbd "<leader>4") 'winum-select-window-4)
-  (evil-define-key 'normal 'global (kbd "<leader>5") 'winum-select-window-5)
-  (evil-define-key 'normal 'global (kbd "<leader>6") 'winum-select-window-6)
-  (evil-define-key 'normal 'global (kbd "<leader>7") 'winum-select-window-7)
-  (evil-define-key 'normal 'global (kbd "<leader>8") 'winum-select-window-8)
-  (evil-define-key 'normal 'global (kbd "<leader>9") 'winum-select-window-9)
-  (evil-define-key 'normal 'global (kbd "<leader>0") 'winum-select-window-0-or-10)
-  (evil-define-key 'normal 'global (kbd "<leader>ww") 'winum-select-window-by-number)
+  :bind
+  (("<leader>1" . winum-select-window-1)
+   ("<leader>2" . winum-select-window-2)
+   ("<leader>3" . winum-select-window-3)
+   ("<leader>4" . winum-select-window-4)
+   ("<leader>5" . winum-select-window-5)
+   ("<leader>6" . winum-select-window-6)
+   ("<leader>7" . winum-select-window-7)
+   ("<leader>8" . winum-select-window-8)
+   ("<leader>9" . winum-select-window-9)
+   ("<leader>0" . winum-select-window-0-or-10)
+   ("<leader>ww" . winum-select-window-by-number))
   :hook (after-init . winum-mode))
 
 (use-package editorconfig
