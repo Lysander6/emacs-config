@@ -150,3 +150,7 @@
   (evil-define-key 'normal 'global (kbd "<leader>0") 'winum-select-window-0-or-10)
   (evil-define-key 'normal 'global (kbd "<leader>ww") 'winum-select-window-by-number)
   :hook (after-init . winum-mode))
+
+(use-package editorconfig
+  :ensure t
+  :hook (text-mode prog-mode))
