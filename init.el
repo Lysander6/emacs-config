@@ -67,7 +67,21 @@
 
 ; enable window change undo/redo
 (use-package winner
-  :hook (after-init . winner-mode))
+  :after evil
+  :hook (after-init . winner-mode)
+  :config
+  (evil-define-key 'normal 'global (kbd "<leader>wu") 'winner-undo)
+  (evil-define-key 'normal 'global (kbd "<leader>wU") 'winner-redo))
+
+; movement between windows with direction keys
+(use-package windmove
+  :after evil
+  :hook (after-init . windmove-mode)
+  :config
+  (evil-define-key 'normal 'global (kbd "<leader>wk") 'windmove-up)
+  (evil-define-key 'normal 'global (kbd "<leader>wj") 'windmove-down)
+  (evil-define-key 'normal 'global (kbd "<leader>wh") 'windmove-left)
+  (evil-define-key 'normal 'global (kbd "<leader>wl") 'windmove-right))
 
 ; enable spell checking (`M-$` to correct a word)
 (use-package flyspell
@@ -85,10 +99,23 @@
   (setq evil-want-keybinding nil)
   :config
   (evil-mode 1)
-  (evil-set-leader nil (kbd "C-SPC"))
+  (evil-set-leader nil (kbd "M-SPC"))
   (evil-set-leader 'normal (kbd "SPC"))
   (evil-set-leader 'normal (kbd ",") t)
-  (evil-define-key 'normal 'global (kbd "<leader>fs") 'save-buffer))
+
+  ; buffers
+  (evil-define-key 'normal 'global (kbd "<leader>fs") 'save-buffer)
+
+  ; windows
+  (evil-define-key 'normal 'global (kbd "<leader>wd") 'delete-window)
+  (evil-define-key 'normal 'global (kbd "<leader>wm") 'delete-other-windows)
+  (evil-define-key 'normal 'global (kbd "<leader>w1") 'delete-other-windows)
+  (evil-define-key 'normal 'global (kbd "<leader>ws") 'split-window-below)
+  (evil-define-key 'normal 'global (kbd "<leader>wv") 'split-window-right)
+  (evil-define-key 'normal 'global (kbd "<leader>w=") 'balance-windows)
+
+  ; quitting
+  (evil-define-key 'normal 'global (kbd "<leader>qq") 'save-buffers-kill-terminal))
 
 (use-package evil-collection
   :after evil
@@ -112,5 +139,18 @@
   :after evil
   :ensure t
   :pin "melpa"
-  :config (evil-define-key 'normal 'global (kbd "<leader>w") winum-base-map)
+  :config
+  ; bindings go here (instead of `:keymap` or `:bind` because plugin
+  ; must be active anyway to give windows their numbers
+  (evil-define-key 'normal 'global (kbd "<leader>1") 'winum-select-window-1)
+  (evil-define-key 'normal 'global (kbd "<leader>2") 'winum-select-window-2)
+  (evil-define-key 'normal 'global (kbd "<leader>3") 'winum-select-window-3)
+  (evil-define-key 'normal 'global (kbd "<leader>4") 'winum-select-window-4)
+  (evil-define-key 'normal 'global (kbd "<leader>5") 'winum-select-window-5)
+  (evil-define-key 'normal 'global (kbd "<leader>6") 'winum-select-window-6)
+  (evil-define-key 'normal 'global (kbd "<leader>7") 'winum-select-window-7)
+  (evil-define-key 'normal 'global (kbd "<leader>8") 'winum-select-window-8)
+  (evil-define-key 'normal 'global (kbd "<leader>9") 'winum-select-window-9)
+  (evil-define-key 'normal 'global (kbd "<leader>0") 'winum-select-window-0-or-10)
+  (evil-define-key 'normal 'global (kbd "<leader>ww") 'winum-select-window-by-number)
   :hook (after-init . winum-mode))
