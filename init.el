@@ -139,7 +139,10 @@
 
 (use-package spaceline
   :ensure t
-  :hook (after-init . spaceline-spacemacs-theme))
+  :hook (after-init . spaceline-spacemacs-theme)
+  :config
+  ;; for some reason does not work when set in `:custom`
+  (setq spaceline-highlight-face-func 'spaceline-highlight-face-evil-state))
 
 (use-package winum
   :after evil
