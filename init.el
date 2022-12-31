@@ -113,6 +113,9 @@
     (kbd "<leader>bd") '(lambda () (interactive) (kill-buffer nil))
     (kbd "<leader>TAB") '(lambda () (interactive) (switch-to-buffer nil))
 
+    ;; commenting
+    (kbd "<leader>; ;") 'comment-line
+
     ;; files
     (kbd "<leader>fs") 'save-buffer
 
@@ -125,7 +128,11 @@
     (kbd "<leader>w=") 'balance-windows
 
     ;; quitting
-    (kbd "<leader>qq") 'save-buffers-kill-terminal))
+    (kbd "<leader>qq") 'save-buffers-kill-terminal)
+
+  (evil-define-key 'visual 'global
+    ;; commenting
+    (kbd "; ;") 'comment-or-uncomment-region))
 
 (use-package evil-collection
   :after evil
