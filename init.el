@@ -58,6 +58,7 @@
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 (package-initialize t)
 
+; call `package-autoremove` to remove unused packages
 (require 'use-package)
 
 ; enable mouse support in terminal
@@ -82,7 +83,12 @@
   :init
   (setq evil-want-integration t)
   (setq evil-want-keybinding nil)
-  :config (evil-mode 1))
+  :config
+  (evil-mode 1)
+  (evil-set-leader nil (kbd "C-SPC"))
+  (evil-set-leader 'normal (kbd "SPC"))
+  (evil-set-leader 'normal (kbd ",") t)
+  (evil-define-key 'normal 'global (kbd "<leader>fs") 'save-buffer))
 
 (use-package evil-collection
   :after evil
@@ -91,6 +97,20 @@
   :config (evil-collection-init))
 
 (use-package magit
-  :defer t
+  :after evil
+  ;:defer t
   :ensure t
-  :pin "melpa")
+  :pin "melpa"
+  :bind (("<leader>gs" . magit-status)))
+
+(use-package spaceline
+  :ensure t
+  :pin "melpa"
+  :hook (after-init . spaceline-spacemacs-theme))
+
+(use-package winum
+  :after evil
+  :ensure t
+  :pin "melpa"
+  :config (evil-define-key 'normal 'global (kbd "<leader>w") winum-base-map)
+  :hook (after-init . winum-mode))
