@@ -114,7 +114,7 @@
     (kbd "<leader>TAB") '(lambda () (interactive) (switch-to-buffer nil))
 
     ;; files
-    (kbd "<leader>fs") 'save-buffer)
+    (kbd "<leader>fs") 'save-buffer
 
     ;; windows
     (kbd "<leader>wd") 'delete-window
@@ -125,7 +125,7 @@
     (kbd "<leader>w=") 'balance-windows
 
     ;; quitting
-    (kbd "<leader>qq") 'save-buffers-kill-terminal)
+    (kbd "<leader>qq") 'save-buffers-kill-terminal))
 
 (use-package evil-collection
   :after evil
