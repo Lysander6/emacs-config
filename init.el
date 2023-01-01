@@ -36,6 +36,10 @@
 (setq-default scroll-margin 4)
 (setq-default scroll-step 1)
 
+(setq-default tab-always-indent 'complete)
+(setq-default completion-cycle-threshold 3)
+(setq-default enable-recursive-minibuffers t)
+
 (load-theme 'modus-vivendi)
 
 ; enable line numbers in prog and text modes
@@ -202,7 +206,8 @@
   (("<leader>bb" . consult-buffer)
    ("<leader>fr" . consult-recent-file)
    ("<leader>ss" . consult-line)
-   ("<leader>sp" . consult-ripgrep))
+   ("<leader>sp" . consult-ripgrep)
+   ("<leader>el" . consult-flymake))
   :custom (consult-narrow-key "<")
   :hook (completion-list-mode . consult-preview-at-point-mode))
 
@@ -215,3 +220,24 @@
 (use-package which-key
   :ensure t
   :hook after-init)
+
+(use-package corfu
+  :ensure t
+  :pin gnu ;; not available on MELPA
+  :custom
+  (corfu-auto t)
+  (corfu-auto-delay 0.2)
+  (corfu-auto-prefix 2)
+  (corfu-cycle t)
+  :hook (text-mode prog-mode)
+  :bind
+  (:map corfu-map
+        ("TAB" . corfu-next)
+        ([tab] . corfu-next)
+        ("S-TAB" . corfu-previous)
+        ([backtab] . corfu-previous)))
+
+(use-package corfu-terminal
+  :ensure t
+  :pin nongnu
+  :hook (text-mode prog-mode))
