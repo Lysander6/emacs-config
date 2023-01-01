@@ -226,10 +226,15 @@
   :pin gnu ;; not available on MELPA
   :custom
   (corfu-auto t)
-  (corfu-auto-delay 0.2)
+  (corfu-auto-delay 0.0)
   (corfu-auto-prefix 2)
+  (corfu-echo-delay t) ;; no delay
   (corfu-cycle t)
-  :hook (text-mode prog-mode)
+  (corfu-preselect-first nil)
+  :hook ((text-mode . corfu-mode)
+	 (prog-mode . corfu-mode)
+         (text-mode . corfu-echo-mode)
+	 (prog-mode . corfu-echo-mode))
   :bind
   (:map corfu-map
         ("TAB" . corfu-next)
