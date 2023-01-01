@@ -211,3 +211,7 @@
   :bind
   (("<leader>pf" . consult-project-extra-find)
    ("<leader>pF" . consult-project-extra-find-other-window)))
+
+(use-package which-key
+  :ensure t
+  :hook after-init)
