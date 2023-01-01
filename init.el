@@ -72,26 +72,22 @@
 
 ; enable window change undo/redo
 (use-package winner
-  :after evil
   :hook (after-init . winner-mode)
-  :config
-  (evil-define-key 'normal 'global
-    (kbd "<leader>wu") 'winner-undo
-    (kbd "<leader>wU") 'winner-redo))
+  :bind
+  (("<leader>wu" . winner-undo)
+   ("<leader>wU" . winner-redo)))
 
 (use-package recentf
   :hook (after-init . recentf-mode))
 
 ; movement between windows with direction keys
 (use-package windmove
-  :after evil
   :hook (after-init . windmove-mode)
-  :config
-  (evil-define-key 'normal 'global
-    (kbd "<leader>wk") 'windmove-up
-    (kbd "<leader>wj") 'windmove-down
-    (kbd "<leader>wh") 'windmove-left
-    (kbd "<leader>wl") 'windmove-right))
+  :bind
+  (("<leader>wk" . windmove-up)
+   ("<leader>wj" . windmove-down)
+   ("<leader>wh" . windmove-left)
+   ("<leader>wl" . windmove-right)))
 
 ; enable spell checking (`M-$` to correct a word)
 (use-package flyspell
@@ -155,7 +151,6 @@
   :config (evil-collection-init))
 
 (use-package magit
-  :after evil
   :ensure t
   :bind (("<leader>gs" . magit-status)))
 
@@ -167,7 +162,6 @@
   (setq spaceline-highlight-face-func 'spaceline-highlight-face-evil-state))
 
 (use-package winum
-  :after evil
   :ensure t
   :bind
   (("<leader>1" . winum-select-window-1)
