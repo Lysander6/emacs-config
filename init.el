@@ -6,9 +6,9 @@
 (setq gc-cons-threshold most-positive-fixnum)
 (setq gc-cons-percentage 1.0)
 (add-hook 'emacs-startup-hook
-	  (defun set-proper-gc-values ()
-	    (setq gc-cons-threshold 100000000)
-	    (setq gc-cons-percentage 0.1)))
+          (defun set-proper-gc-values ()
+            (setq gc-cons-threshold 100000000)
+            (setq gc-cons-percentage 0.1)))
 
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (load custom-file)
@@ -79,6 +79,9 @@
     (kbd "<leader>wu") 'winner-undo
     (kbd "<leader>wU") 'winner-redo))
 
+(use-package recentf
+  :hook (after-init . recentf-mode))
+
 ; movement between windows with direction keys
 (use-package windmove
   :after evil
@@ -115,7 +118,7 @@
     ;; buffers
     (kbd "<leader>bd") '(lambda () (interactive) (kill-buffer nil))
     (kbd "<leader>TAB") '(lambda () (interactive) (switch-to-buffer nil))
-    (kbd "<leader>bb") 'switch-to-buffer
+    ;;(kbd "<leader>bb") 'switch-to-buffer
 
     ;; commands
     (kbd "<leader>:") 'execute-extended-command
@@ -199,8 +202,12 @@
   :ensure t
   :init (marginalia-mode))
 
-;; (use-package consult
-;;   :ensure t
-;;   :bind
-;;   (("<leader>bb" . consult-buffer))
-;;   :hook (completion-list-mode . consult-preview-at-point-mode))
+(use-package consult
+  :ensure t
+  :bind
+  (("<leader>bb" . consult-buffer)
+   ("<leader>fr" . consult-recent-file)
+   ("<leader>ss" . consult-line)
+   ("<leader>sp" . consult-ripgrep)
+   ("<leader>pf" . consult-find))
+  :hook (completion-list-mode . consult-preview-at-point-mode))
