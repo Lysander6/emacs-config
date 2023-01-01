@@ -208,6 +208,12 @@
   (("<leader>bb" . consult-buffer)
    ("<leader>fr" . consult-recent-file)
    ("<leader>ss" . consult-line)
-   ("<leader>sp" . consult-ripgrep)
-   ("<leader>pf" . consult-find))
+   ("<leader>sp" . consult-ripgrep))
+  :custom (consult-narrow-key "<")
   :hook (completion-list-mode . consult-preview-at-point-mode))
+
+(use-package consult-project-extra
+  :ensure t
+  :bind
+  (("<leader>pf" . consult-project-extra-find)
+   ("<leader>pF" . consult-project-extra-find-other-window)))
