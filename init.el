@@ -246,3 +246,7 @@
   :ensure t
   :pin nongnu
   :hook (text-mode prog-mode))
+
+(use-package markdown-mode
+  :ensure t
+  :mode ("\\.md\\'" . gfm-mode))
