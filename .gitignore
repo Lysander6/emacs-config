@@ -57,3 +57,5 @@ flycheck_*.el
 recentf
 transient
 projects
+eln-cache
+tree-sitter
