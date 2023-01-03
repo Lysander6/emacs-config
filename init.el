@@ -250,3 +250,7 @@
 (use-package markdown-mode
   :ensure t
   :mode ("\\.md\\'" . gfm-mode))
+
+(use-package yasnippet
+  :ensure t
+  :hook (prog-mode . yas-global-mode))
