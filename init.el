@@ -101,7 +101,7 @@
   :init
   (setq evil-want-integration t)
   (setq evil-want-keybinding nil)
-  :config (evil-mode 1))
+  :hook after-init)
 
 (use-package evil-collection
   :after evil
