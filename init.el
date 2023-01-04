@@ -40,6 +40,9 @@
 (setq-default completion-cycle-threshold 3)
 (setq-default enable-recursive-minibuffers t)
 
+;; map custom file types to modes
+(add-to-list 'auto-mode-alist '("\\.cdt$" . typescript-ts-mode))
+
 (load-theme 'modus-vivendi)
 
 ; enable line numbers in prog and text modes
@@ -254,3 +257,10 @@
 (use-package yasnippet
   :ensure t
   :hook (prog-mode . yas-global-mode))
+
+(use-package lsp-mode
+  :ensure t
+  :init (setq-default lsp-keymap-prefix "<localleader>")
+  :commands lsp
+  :hook ((js-ts-mode . lsp)
+         (lsp . lsp-enable-which-key-integration)))
