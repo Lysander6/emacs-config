@@ -101,7 +101,9 @@
   :init
   (setq evil-want-integration t)
   (setq evil-want-keybinding nil)
-  :hook after-init)
+  :hook after-init
+  :config
+  (evil-set-undo-system 'undo-redo))
 
 (use-package evil-collection
   :after evil
