@@ -60,106 +60,61 @@
 
 (add-hook 'window-configuration-change-hook 'change-window-divider)
 
-; adjust vertical divider and line numbers colours
-(set-face-foreground 'vertical-border (face-background 'line-number))
-(set-face-background 'line-number "#000000")
+;; adjust vertical divider and line numbers colours
+(set-face-foreground 'vertical-border "#000000")
+;; (set-face-background 'line-number "#000000")
 
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 (package-initialize t)
 
-; use MELPA archive (repository) as default
+;; use MELPA archive (repository) as default
 (setq-default use-package-always-pin "melpa")
-; call `package-autoremove` to remove unused packages
+;; call `package-autoremove` to remove unused packages
 (require 'use-package)
 
-; enable mouse support in terminal
+;; enable mouse support in terminal
 (use-package xt-mouse
   :hook (after-init . xterm-mouse-mode))
 
-; enable window change undo/redo
+;; enable window change undo/redo
 (use-package winner
-  :hook (after-init . winner-mode)
-  :bind
-  (("<leader>wu" . winner-undo)
-   ("<leader>wU" . winner-redo)))
+  :hook after-init)
 
 (use-package recentf
-  :hook (after-init . recentf-mode))
+  :hook after-init)
 
-; movement between windows with direction keys
+;; movement between windows with direction keys
 (use-package windmove
-  :hook (after-init . windmove-mode)
-  :bind
-  (("<leader>wk" . windmove-up)
-   ("<leader>wj" . windmove-down)
-   ("<leader>wh" . windmove-left)
-   ("<leader>wl" . windmove-right)))
+  :hook after-init)
 
-; enable spell checking (`M-$` to correct a word)
+;; enable spell checking
 (use-package flyspell
   :custom
   (flyspell-default-dictionary "en_GB")
   (flyspell-issue-welcome-flag nil)
   :hook ((text-mode . flyspell-mode)
-	 (prog-mode . flyspell-prog-mode)))
+         (prog-mode . flyspell-prog-mode)))
 
 (use-package evil
   :ensure t
   :init
   (setq evil-want-integration t)
   (setq evil-want-keybinding nil)
-  :config
-  (evil-mode 1)
-
-  ;; set leader and local leader
-  (evil-set-leader nil (kbd "M-SPC"))
-  (evil-set-leader 'normal (kbd "SPC"))
-  (evil-set-leader 'normal (kbd ",") t)
-
-  (evil-define-key 'normal 'global
-    ;; buffers
-    (kbd "<leader>bd") '(lambda () (interactive) (kill-buffer nil))
-    (kbd "<leader>TAB") '(lambda () (interactive) (switch-to-buffer nil))
-    ;;(kbd "<leader>bb") 'switch-to-buffer
-
-    ;; commands
-    (kbd "<leader>:") 'execute-extended-command
-
-    ;; commenting
-    (kbd "<leader>; ;") 'comment-line
-
-    ;; files
-    (kbd "<leader>fs") 'save-buffer
-    (kbd "<leader>ff") 'find-file
-
-    ;; windows
-    (kbd "<leader>wd") 'delete-window
-    (kbd "<leader>wm") 'delete-other-windows
-    (kbd "<leader>w1") 'delete-other-windows
-    (kbd "<leader>ws") 'split-window-below
-    (kbd "<leader>wv") 'split-window-right
-    (kbd "<leader>w=") 'balance-windows
-
-    ;; other windows
-    (kbd "M-<up>") '(lambda () (interactive) (scroll-other-window -1))
-    (kbd "M-<down>") '(lambda () (interactive) (scroll-other-window 1))
-
-    ;; quitting
-    (kbd "<leader>qq") 'save-buffers-kill-terminal)
-
-  (evil-define-key 'visual 'global
-    ;; commenting
-    (kbd "; ;") 'comment-or-uncomment-region))
+  :config (evil-mode 1))
 
 (use-package evil-collection
   :after evil
   :ensure t
   :config (evil-collection-init))
 
+(use-package evil-surround
+  :ensure t
+  :config (global-evil-surround-mode 1))
+
 (use-package magit
   :ensure t
-  :bind (("<leader>gs" . magit-status)))
+  :commands (magit-status))
 
 (use-package spaceline
   :ensure t
@@ -170,19 +125,7 @@
 
 (use-package winum
   :ensure t
-  :bind
-  (("<leader>1" . winum-select-window-1)
-   ("<leader>2" . winum-select-window-2)
-   ("<leader>3" . winum-select-window-3)
-   ("<leader>4" . winum-select-window-4)
-   ("<leader>5" . winum-select-window-5)
-   ("<leader>6" . winum-select-window-6)
-   ("<leader>7" . winum-select-window-7)
-   ("<leader>8" . winum-select-window-8)
-   ("<leader>9" . winum-select-window-9)
-   ("<leader>0" . winum-select-window-0-or-10)
-   ("<leader>ww" . winum-select-window-by-number))
-  :hook (after-init . winum-mode))
+  :hook after-init)
 
 (use-package editorconfig
   :ensure t
@@ -205,20 +148,19 @@
 
 (use-package consult
   :ensure t
-  :bind
-  (("<leader>bb" . consult-buffer)
-   ("<leader>fr" . consult-recent-file)
-   ("<leader>ss" . consult-line)
-   ("<leader>sp" . consult-ripgrep)
-   ("<leader>el" . consult-flymake))
+  :commands
+  (consult-buffer
+   consult-line
+   consult-ripgrep
+   consult-flymake)
   :custom (consult-narrow-key "<")
   :hook (completion-list-mode . consult-preview-at-point-mode))
 
 (use-package consult-project-extra
   :ensure t
-  :bind
-  (("<leader>pf" . consult-project-extra-find)
-   ("<leader>pF" . consult-project-extra-find-other-window)))
+  :commands
+  (consult-project-extra-find
+   consult-project-extra-find-other-window))
 
 (use-package which-key
   :ensure t
@@ -235,9 +177,9 @@
   (corfu-cycle t)
   (corfu-preselect-first nil)
   :hook ((text-mode . corfu-mode)
-	 (prog-mode . corfu-mode)
+         (prog-mode . corfu-mode)
          (text-mode . corfu-echo-mode)
-	 (prog-mode . corfu-echo-mode))
+         (prog-mode . corfu-echo-mode))
   :bind
   (:map corfu-map
         ("TAB" . corfu-next)
@@ -258,9 +200,140 @@
   :ensure t
   :hook (prog-mode . yas-global-mode))
 
+;; (add-to-list 'eglot-server-programs '(html-mode "jqtpl-language-server"))
+
 (use-package lsp-mode
   :ensure t
-  :init (setq-default lsp-keymap-prefix "<localleader>")
+  :init (setq-default lsp-keymap-prefix "<leader>l")
   :commands lsp
   :hook ((js-ts-mode . lsp)
+         (rust-ts-mode . lsp)
          (lsp . lsp-enable-which-key-integration)))
+
+(use-package general
+  :ensure t
+  :after evil
+  :config
+  (setq general-use-package-emit-autoloads nil)
+
+  (general-define-key
+   :states '(normal insert motion emacs)
+   :keymaps 'override
+
+   "M-<up>"     '("other window up" . (lambda () (interactive) (scroll-other-window -1)))
+   "M-<down>"   '("other window down" . (lambda () (interactive) (scroll-other-window 1))))
+
+  ;; heavily inspired by https://github.com/tshu-w/.emacs.d/blob/master/lisp/core-keybinds.el
+
+  (general-define-key
+   :states '(normal insert motion emacs)
+   :keymaps 'override
+   :prefix-map 'tyrant-map
+   :prefix "SPC"
+   :non-normal-prefix "M-SPC")
+
+  (general-create-definer tyrant-def :keymaps 'tyrant-map)
+  (tyrant-def "" nil)
+
+  (general-create-definer despot-def
+    :states '(normal insert motion emacs)
+    :keymaps 'override
+    :major-modes t
+    :prefix "SPC m"
+    :non-normal-prefix "M-SPC m")
+  (despot-def "" nil)
+
+  (general-def universal-argument-map
+    "SPC u" 'universal-argument-more)
+
+  (tyrant-def
+    "SPC"        '("M-x" . execute-extended-command)
+    "TAB"        '("last buffer" . (lambda () (interactive) (switch-to-buffer nil)))
+    "!"          '("shell cmd" . shell-command)
+
+    "1"          'winum-select-window-1
+    "2"          'winum-select-window-2
+    "3"          'winum-select-window-3
+    "4"          'winum-select-window-4
+    "5"          'winum-select-window-5
+    "6"          'winum-select-window-6
+    "7"          'winum-select-window-7
+    "8"          'winum-select-window-8
+    "9"          'winum-select-window-9
+    "0"          'winum-select-window-0-or-10
+
+    "; ;"        'comment-line
+
+    "b"          (cons "buffers" (make-sparse-keymap))
+    "bb"         'consult-buffer
+    "bB"         'ibuffer
+    "bd"         'kill-current-buffer
+    "bs"         'scratch-buffer
+
+    "c"          (cons "code" (make-sparse-keymap))
+    "cc"         'compile
+    "cn"         'next-error
+    "cp"         'previous-error
+    "cx"         'kill-compilation
+
+    "e"          (cons "errors" (make-sparse-keymap))
+    "el"         'consult-flymake
+
+    "f"          (cons "files" (make-sparse-keymap))
+    "ff"         'find-file
+    "fr"         'consult-recent-file
+    "fs"         'save-buffer
+
+    "g"          (cons "git" (make-sparse-keymap))
+    "gs"         'magit-status
+
+    "h"          (cons "help" (make-sparse-keymap))
+    "ha"         'apropos
+    "hb"         'describe-bindings
+    "hc"         'describe-char
+    "hf"         'describe-function
+    "hF"         'describe-face
+    "hi"         'info-emacs-manual
+    "hI"         'info-display-manual
+    "hk"         'describe-key
+    "hK"         'describe-keymap
+    "hm"         'describe-mode
+    "hM"         'woman
+    "hp"         'describe-package
+    "ht"         'describe-text-properties
+    "hv"         'describe-variable
+
+    "m"          (cons "major mode" (make-sparse-keymap))
+
+    "p"          (cons "project" (make-sparse-keymap))
+    "pf"         'consult-project-extra-find
+    "pF"         'consult-project-extra-find-other-window
+
+    "q"          (cons "quit" (make-sparse-keymap))
+    "qq"         'save-buffers-kill-terminal
+    "qQ"         'save-buffers-kill-emacs
+
+    "s"          (cons "search" (make-sparse-keymap))
+    "ss"         'consult-line
+    "sp"         'consult-ripgrep
+
+    "T"          (cons "toggles" (make-sparse-keymap))
+    "Tw"         'whitespace-mode
+
+    "u"          '("universal arg" . universal-argument)
+
+    "w"          (cons "windows" (make-sparse-keymap))
+    "w TAB"      'other-window
+    "w1"         'delete-other-windows
+    "w="         'balance-windows
+    "wU"         'winner-redo
+    "wd"         'delete-window
+    "wh"         'windmove-left
+    "wj"         'windmove-down
+    "wk"         'windmove-up
+    "wl"         'windmove-right
+    "wm"         'delete-other-windows
+    "ws"         'split-window-below
+    "wu"         'winner-undo
+    "wv"         'split-window-right
+    "ww"         'winum-select-window-by-number))
