@@ -19,8 +19,11 @@
 (setq-default read-file-name-completion-ignore-case t)
 (setq-default read-buffer-completion-ignore-case t)
 
-; do not create lock files
+;; do not create lock files
 (setq-default create-lockfiles nil)
+
+;; do not create backup files
+(setq-default make-backup-files nil)
 
 ; use y/n in place of yes/no
 (setq-default use-short-answers t)
