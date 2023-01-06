@@ -200,6 +200,7 @@
          (prog-mode . corfu-echo-mode))
   :bind
   (:map corfu-map
+        ("SPC" . corfu-insert-separator)
         ("TAB" . corfu-next)
         ([tab] . corfu-next)
         ("S-TAB" . corfu-previous)
