@@ -4,7 +4,7 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(treemacs-magit treemacs-evil treemacs evil-surround general lsp-mode yasnippet markdown-mode corfu-terminal corfu which-key consult-project-extra consult marginalia orderless vertico editorconfig winum spaceline magit evil-collection evil)))
+   '(diminish treemacs-magit treemacs-evil treemacs evil-surround general lsp-mode yasnippet markdown-mode corfu-terminal corfu which-key consult-project-extra consult marginalia orderless vertico editorconfig winum spaceline magit evil-collection evil)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

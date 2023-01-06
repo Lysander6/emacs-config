@@ -96,8 +96,15 @@
   :custom
   (flyspell-default-dictionary "en_GB")
   (flyspell-issue-welcome-flag nil)
+  :diminish
   :hook ((text-mode . flyspell-mode)
          (prog-mode . flyspell-prog-mode)))
+
+(use-package eldoc
+  :diminish)
+
+(use-package autorevert
+  :diminish 'auto-revert-mode)
 
 (use-package evil
   :ensure t
@@ -111,6 +118,7 @@
 (use-package evil-collection
   :after evil
   :ensure t
+  :custom (evil-collection-want-unimpaired-p nil)
   :config (evil-collection-init))
 
 (use-package evil-surround
@@ -132,8 +140,12 @@
   :ensure t
   :hook after-init)
 
+(use-package diminish
+  :ensure t)
+
 (use-package editorconfig
   :ensure t
+  :diminish
   :hook (text-mode prog-mode))
 
 (use-package vertico
@@ -169,6 +181,7 @@
 
 (use-package which-key
   :ensure t
+  :diminish
   :hook after-init)
 
 (use-package corfu
@@ -203,6 +216,7 @@
 
 (use-package yasnippet
   :ensure t
+  :diminish 'yas-minor-mode
   :hook (prog-mode . yas-global-mode))
 
 ;; (add-to-list 'eglot-server-programs '(html-mode "jqtpl-language-server"))
