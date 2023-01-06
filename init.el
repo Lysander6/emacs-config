@@ -313,6 +313,7 @@
     "p"          (cons "project" (make-sparse-keymap))
     "pf"         'consult-project-extra-find
     "pF"         'consult-project-extra-find-other-window
+    "pt"         'treemacs
 
     "q"          (cons "quit" (make-sparse-keymap))
     "qq"         'save-buffers-kill-terminal
@@ -342,3 +343,15 @@
     "wu"         'winner-undo
     "wv"         'split-window-right
     "ww"         'winum-select-window-by-number))
+
+(use-package treemacs
+  :ensure t
+  :commands (treemacs))
+
+(use-package treemacs-evil
+  :ensure t
+  :after (treemacs evil))
+
+(use-package treemacs-magit
+  :ensure t
+  :after (treemacs magit))
