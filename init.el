@@ -43,6 +43,9 @@
 (setq-default completion-cycle-threshold 3)
 (setq-default enable-recursive-minibuffers t)
 
+;; improve lsp-mode performance
+(setq-default read-process-output-max (* 1024 1024))
+
 ;; map custom file types to modes
 (add-to-list 'auto-mode-alist '("\\.cdt$" . typescript-ts-mode))
 
