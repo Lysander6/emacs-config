@@ -39,6 +39,14 @@
 (setq-default scroll-margin 4)
 (setq-default scroll-step 1)
 
+;; faster scrolling with mouse wheel
+(setq-default mouse-wheel-scroll-amount
+              '(3
+                ((shift) . hscroll)
+                ((meta))
+                ((control meta) . global-text-scale)
+                ((control) . text-scale)))
+
 (setq-default tab-always-indent 'complete)
 (setq-default completion-cycle-threshold 3)
 (setq-default enable-recursive-minibuffers t)
