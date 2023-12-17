@@ -64,7 +64,7 @@
 (menu-bar-mode -1)
 (tool-bar-mode -1)
 
-(load-theme 'modus-vivendi)
+(load-theme 'modus-vivendi-tinted)
 
 ;; enable line numbers in prog and text modes
 (defun display-line-numbers-hook ()
@@ -132,6 +132,18 @@
   :hook ((text-mode . flyspell-mode)
          (prog-mode . flyspell-prog-mode)))
 
+(use-package eglot
+  :commands (eglot)
+  :init
+  (setq eglot-workspace-configuration
+   '(:rust-analyzer
+     (:checkOnSave ( :command "clippy"
+                     :extraArgs ["--" "-Wclippy::pedantic" "-Wclippy::perf"])
+      :inlayHints ( :maxLength 120
+                    :closureReturnTypeHints (:enable t)
+                    :lifetimeElisionHints (:enable t :useParameterNames t)
+                    :implicitDrops (:enable t))))))
+
 (use-package diminish
   :ensure t)
 
@@ -155,6 +167,11 @@
   :after evil
   :ensure t
   :config (evil-terminal-cursor-changer-activate))
+
+(use-package evil-commentary
+  :after evil
+  :ensure t
+  :hook (text-mode prog-mode))
 
 (use-package editorconfig
   :ensure t
@@ -211,7 +228,11 @@
 (use-package vertico
   :ensure t
   :pin gnu
-  :hook after-init)
+  :hook after-init
+  :bind
+  (:map vertico-map
+        ("C-j" . vertico-next)
+        ("C-k" . vertico-previous)))
 
 (use-package marginalia
   :ensure t
@@ -243,3 +264,126 @@
 ;;                   #'consult-completion-in-region
 ;;                 #'completion--in-region)
 ;;               args)))
+
+(use-package winum
+  :ensure t
+  :hook after-init)
+
+(use-package general
+  :ensure t
+  :after evil
+  :init (setq general-use-package-emit-autoloads nil)
+  :config
+
+  (general-define-key
+   :states '(normal insert motion emacs)
+   :keymaps 'override
+   :prefix-map 'tyrant-map
+   :prefix "SPC"
+   :non-normal-prefix "C-SPC")
+
+  (general-create-definer tyrant-def :keymaps 'tyrant-map)
+  (tyrant-def "" nil)
+
+  (general-create-definer despot-def
+    :states '(normal insert motion emacs)
+    :keymaps 'override
+    :major-modes t
+    :prefix "SPC m"
+    :non-normal-prefix "C-SPC m")
+  (despot-def "" nil)
+
+  (tyrant-def
+    "SPC"   '("M-x" . execute-extended-command)
+    "TAB"   '("last buffer" . (lambda () (interactive) (switch-to-buffer nil)))
+    "!"     '("shell cmd" . shell-command)
+
+    "1"     'winum-select-window-1
+    "2"     'winum-select-window-2
+    "3"     'winum-select-window-3
+    "4"     'winum-select-window-4
+    "5"     'winum-select-window-5
+    "6"     'winum-select-window-6
+    "7"     'winum-select-window-7
+    "8"     'winum-select-window-8
+    "9"     'winum-select-window-9
+    "0"     'winum-select-window-0-or-10
+
+    "f"     (cons "files" (make-sparse-keymap))
+    "ff"    'find-file
+    "fr"    'consult-recent-file
+    "fs"    'save-buffer
+
+    "g"     (cons "git" (make-sparse-keymap))
+    "gs"    'magit-status
+
+    "q"     (cons "quit" (make-sparse-keymap))
+    "qq"    'save-buffers-kill-terminal
+    "qQ"    'save-buffers-kill-emacs
+
+    "s"     (cons "search" (make-sparse-keymap))
+    "ss"    'consult-line
+
+    "t"     (cons "toggle" (make-sparse-keymap))
+    "ti"    'eglot-inlay-hints-mode
+
+    "w"     (cons "windows" (make-sparse-keymap))
+    "w TAB" 'other-window
+    "w1"    'delete-other-windows
+    "w="    'balance-windows
+    "wd"    'delete-window
+    "ws"    'split-window-below
+    "wv"    'split-window-right))
+
+(use-package which-key
+  :ensure t
+  :hook after-init)
+
+(use-package embark
+  :ensure t
+  :bind
+  (("C-." . embark-act)
+   ("C-h B" . embark-bindings))
+;;  :config
+;;  (defun embark-which-key-indicator ()
+;;    "An embark indicator that displays keymaps using which-key.
+;;The which-key help message will show the type and value of the
+;;current target followed by an ellipsis if there are further
+;;targets."
+;;    (lambda (&optional keymap targets prefix)
+;;      (if (null keymap)
+;;          (which-key--hide-popup-ignore-command)
+;;        (which-key--show-keymap
+;;         (if (eq (plist-get (car targets) :type) 'embark-become)
+;;             "Become"
+;;           (format "Act on %s '%s'%s"
+;;                   (plist-get (car targets) :type)
+;;                   (embark--truncate-target (plist-get (car targets) :target))
+;;                   (if (cdr targets) "…" "")))
+;;         (if prefix
+;;             (pcase (lookup-key keymap prefix 'accept-default)
+;;               ((and (pred keymapp) km) km)
+;;               (_ (key-binding prefix 'accept-default)))
+;;           keymap)
+;;         nil nil t (lambda (binding)
+;;                     (not (string-suffix-p "-argument" (cdr binding))))))))
+;;
+;;  (setq embark-indicators
+;;        '(embark-which-key-indicator
+;;          embark-highlight-indicator
+;;          embark-isearch-highlight-indicator))
+;;
+;;  (defun embark-hide-which-key-indicator (fn &rest args)
+;;    "Hide the which-key indicator immediately when using the completing-read prompter."
+;;    (which-key--hide-popup-ignore-command)
+;;    (let ((embark-indicators
+;;           (remq #'embark-which-key-indicator embark-indicators)))
+;;      (apply fn args)))
+;;
+;;  (advice-add #'embark-completing-read-prompter
+;;              :around #'embark-hide-which-key-indicator)
+  )
+
+(use-package embark-consult
+  :ensure t
+  :hook (embark-collect-mode . consult-preview-at-point-mode))
