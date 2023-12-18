@@ -36,10 +36,10 @@
 
  ;; faster scrolling with mouse wheel
  mouse-wheel-scroll-amount '(3
-			     ((shift) . hscroll)
-			     ((meta))
-			     ((control meta) . global-text-scale)
-			     ((control) . text-scale))
+                             ((shift) . hscroll)
+                             ((meta))
+                             ((control meta) . global-text-scale)
+                             ((control) . text-scale))
 
  visible-bell t
 
@@ -64,20 +64,16 @@
 (menu-bar-mode -1)
 (tool-bar-mode -1)
 
-(load-theme 'modus-vivendi-tinted)
-
-;; enable line numbers in prog and text modes
-(defun display-line-numbers-hook ()
-  (setq display-line-numbers t))
-
-(add-hook 'prog-mode-hook 'display-line-numbers-hook)
-(add-hook 'text-mode-hook 'display-line-numbers-hook)
+(load-theme 'modus-vivendi)
+;; (load-theme 'modus-vivendi-tinted)
 
 ;; use seamless vertical window divider
 (defun change-window-divider ()
   (let ((display-table (or buffer-display-table standard-display-table (make-display-table))))
-    (set-display-table-slot display-table 5 ?│)
+    (set-display-table-slot display-table 5 ?█)
     (set-window-display-table (selected-window) display-table)))
+
+(set-face-attribute 'vertical-border nil :foreground (face-attribute 'line-number :background))
 
 (add-hook 'window-configuration-change-hook 'change-window-divider)
 
@@ -88,6 +84,21 @@
                            ("gnu" . "https://elpa.gnu.org/packages/")
                            ("nongnu" . "https://elpa.nongnu.org/nongnu/")))
   (package-initialize t))
+
+(use-package display-line-numbers
+  :hook (text-mode prog-mode)
+  :custom
+  (display-line-numbers-width 3)
+  ;; (display-line-numbers-minor-tick 5)
+  ;; (display-line-numbers-major-tick 15)
+  :config
+  (defun toggle-relative-line-numbers ()
+    (interactive)
+    (setq display-line-numbers-type
+          (if (eq display-line-numbers-type t)
+              'relative
+            t))
+    (display-line-numbers-mode)))
 
 (use-package xt-mouse
   :unless (display-graphic-p)
@@ -154,7 +165,9 @@
   :hook after-init
   :custom
   (evil-undo-system 'undo-redo)
-  (evil-insert-state-cursor 'bar))
+  (evil-insert-state-cursor 'bar)
+  :config
+  (evil-select-search-module 'evil-search-module 'evil-search))
 
 (use-package evil-collection
   :after evil
@@ -311,6 +324,7 @@
 
     "b"     (cons "buffers" (make-sparse-keymap))
     "bb"    'consult-buffer
+    "bd"    'kill-current-buffer
     "bs"    'scratch-buffer
 
     "f"     (cons "files" (make-sparse-keymap))
@@ -323,24 +337,33 @@
 
     "p"     (cons "project" (make-sparse-keymap))
     "pf"    'project-find-file
+    "pt"    'treemacs
 
     "q"     (cons "quit" (make-sparse-keymap))
     "qq"    'save-buffers-kill-terminal
     "qQ"    'save-buffers-kill-emacs
 
     "s"     (cons "search" (make-sparse-keymap))
+    "sc"    '("clear highlight" . evil-ex-nohighlight)
     "ss"    'consult-line
 
     "t"     (cons "toggle" (make-sparse-keymap))
     "ti"    'eglot-inlay-hints-mode
+    "tr"    'toggle-relative-line-numbers
 
     "w"     (cons "windows" (make-sparse-keymap))
-    "w TAB" 'other-window
+    "ww"    'other-window
     "w1"    'delete-other-windows
+    "wo"    'delete-other-windows
     "w="    'balance-windows
     "wd"    'delete-window
     "ws"    'split-window-below
-    "wv"    'split-window-right))
+    "wv"    'split-window-right
+    "wr"    'evil-window-rotate-upwards
+    "wj"    'evil-window-down
+    "wk"    'evil-window-up
+    "wh"    'evil-window-left
+    "wl"    'evil-window-right))
 
 (use-package which-key
   :ensure t
@@ -394,3 +417,53 @@
 (use-package embark-consult
   :ensure t
   :hook (embark-collect-mode . consult-preview-at-point-mode))
+
+(use-package copilot
+  :ensure t
+  :vc ( :url "https://github.com/zerolfx/copilot.el"
+        :rev :newest)
+  :bind
+  (:map copilot-completion-map
+        ("C-y" . copilot-accept-completion)))
+
+(use-package git-gutter
+  :ensure t
+  :hook (text-mode prog-mode)
+  :custom
+  (git-gutter:unchanged-sign " ")
+  (git-gutter:added-sign "┃")
+  (git-gutter:modified-sign "┃")
+  (git-gutter:deleted-sign "▁")
+  :config
+  (set-face-attribute 'git-gutter:unchanged nil
+                      :background (face-attribute 'line-number :background))
+
+  (set-face-attribute 'git-gutter:added nil
+                      :background (face-attribute 'line-number :background)
+                      :foreground (face-attribute 'modus-themes-fg-green :foreground))
+
+  (set-face-attribute 'git-gutter:modified nil
+                      :background (face-attribute 'line-number :background)
+                      :foreground (face-attribute 'modus-themes-fg-yellow :foreground))
+
+  (set-face-attribute 'git-gutter:deleted nil
+                      :background (face-attribute 'line-number :background)
+                      :foreground (face-attribute 'modus-themes-fg-red :foreground)))
+
+(use-package treemacs
+  :ensure t
+  :commands (treemacs))
+
+(use-package treemacs-evil
+  :ensure t
+  :after (evil treemacs))
+
+(use-package nerd-icons
+  :ensure t
+  :defer t)
+
+(use-package treemacs-nerd-icons
+  :ensure t
+  :after (treemacs)
+  :config
+  (treemacs-load-theme "nerd-icons"))
