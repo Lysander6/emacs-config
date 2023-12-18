@@ -374,7 +374,8 @@
     "wj"    'evil-window-down
     "wk"    'evil-window-up
     "wh"    'evil-window-left
-    "wl"    'evil-window-right))
+    "wl"    'evil-window-right
+    "wu"    'winner-undo))
 
 (use-package which-key
   :ensure t
@@ -471,7 +472,9 @@
 
 (use-package treemacs
   :ensure t
-  :commands (treemacs))
+  :commands (treemacs)
+  :config
+  (treemacs-hide-gitignored-files-mode nil))
 
 (use-package treemacs-evil
   :ensure t
@@ -485,7 +488,18 @@
   :ensure t
   :after (treemacs)
   :config
-  (treemacs-load-theme "nerd-icons"))
+  (treemacs-load-theme "nerd-icons")
+
+  (set-face-attribute 'treemacs-nerd-icons-file-face nil
+                      :foreground (face-attribute 'modus-themes-fg-yellow-faint :foreground))
+  (set-face-attribute 'treemacs-directory-face nil
+                      :foreground (face-attribute 'default :foreground))
+  (set-face-attribute 'treemacs-directory-collapsed-face nil
+                      :foreground (face-attribute 'default :foreground))
+  (set-face-attribute 'treemacs-git-modified-face nil
+                      :foreground (face-attribute 'modus-themes-fg-yellow-warmer :foreground))
+  (set-face-attribute 'treemacs-git-added-face nil
+                      :foreground (face-attribute 'modus-themes-fg-green-faint :foreground)))
 
 (use-package nerd-icons-corfu
   :ensure t
