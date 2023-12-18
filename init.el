@@ -298,16 +298,20 @@
     "TAB"   '("last buffer" . (lambda () (interactive) (switch-to-buffer nil)))
     "!"     '("shell cmd" . shell-command)
 
-    "1"     'winum-select-window-1
-    "2"     'winum-select-window-2
-    "3"     'winum-select-window-3
-    "4"     'winum-select-window-4
-    "5"     'winum-select-window-5
-    "6"     'winum-select-window-6
-    "7"     'winum-select-window-7
-    "8"     'winum-select-window-8
-    "9"     'winum-select-window-9
-    "0"     'winum-select-window-0-or-10
+    "1"     '("window 1" . winum-select-window-1)
+    "2"     '("window 2" . winum-select-window-2)
+    "3"     '("window 3" . winum-select-window-3)
+    "4"     '("window 4" . winum-select-window-4)
+    "5"     '("window 5" . winum-select-window-5)
+    "6"     '("window 6" . winum-select-window-6)
+    "7"     '("window 7" . winum-select-window-7)
+    "8"     '("window 8" . winum-select-window-8)
+    "9"     '("window 9" . winum-select-window-9)
+    "0"     '("window 0 or 10" . winum-select-window-0-or-10)
+
+    "b"     (cons "buffers" (make-sparse-keymap))
+    "bb"    'consult-buffer
+    "bs"    'scratch-buffer
 
     "f"     (cons "files" (make-sparse-keymap))
     "ff"    'find-file
@@ -316,6 +320,9 @@
 
     "g"     (cons "git" (make-sparse-keymap))
     "gs"    'magit-status
+
+    "p"     (cons "project" (make-sparse-keymap))
+    "pf"    'project-find-file
 
     "q"     (cons "quit" (make-sparse-keymap))
     "qq"    'save-buffers-kill-terminal
