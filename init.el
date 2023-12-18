@@ -100,6 +100,12 @@
             t))
     (display-line-numbers-mode)))
 
+(use-package display-fill-column-indicator
+  :custom (display-fill-column-indicator-character ?│)
+  :config
+  (add-hook 'display-fill-column-indicator-mode-hook
+            (lambda () (set-face-attribute 'fill-column-indicator nil :background nil))))
+
 (use-package xt-mouse
   :unless (display-graphic-p)
   :hook (after-init . xterm-mouse-mode))
@@ -348,6 +354,7 @@
     "ss"    'consult-line
 
     "t"     (cons "toggle" (make-sparse-keymap))
+    "tf"    'display-fill-column-indicator-mode
     "ti"    'eglot-inlay-hints-mode
     "tr"    'toggle-relative-line-numbers
 
