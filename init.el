@@ -111,7 +111,8 @@
   :hook (after-init . xterm-mouse-mode))
 
 (use-package hl-line
-  :hook (text-mode prog-mode)
+  ;; :hook (text-mode prog-mode)
+  :defer t
   :custom
   (hl-line-sticky-flag nil))
 
@@ -356,6 +357,7 @@
     "t"     (cons "toggle" (make-sparse-keymap))
     "tf"    'display-fill-column-indicator-mode
     "ti"    'eglot-inlay-hints-mode
+    "tl"    'hl-line-mode
     "tr"    'toggle-relative-line-numbers
 
     "w"     (cons "windows" (make-sparse-keymap))
@@ -442,20 +444,28 @@
   (git-gutter:modified-sign "┃")
   (git-gutter:deleted-sign "▁")
   :config
+
+  (set-face-attribute 'line-number nil
+                      :background (face-attribute 'default :background)
+                      :foreground "#404040")
+
+  (set-face-attribute 'line-number-current-line nil
+                      :background (face-attribute 'default :background))
+
   (set-face-attribute 'git-gutter:unchanged nil
                       :background (face-attribute 'line-number :background))
 
   (set-face-attribute 'git-gutter:added nil
                       :background (face-attribute 'line-number :background)
-                      :foreground (face-attribute 'modus-themes-fg-green :foreground))
+                      :foreground (face-attribute 'modus-themes-fg-green-faint :foreground))
 
   (set-face-attribute 'git-gutter:modified nil
                       :background (face-attribute 'line-number :background)
-                      :foreground (face-attribute 'modus-themes-fg-yellow :foreground))
+                      :foreground (face-attribute 'modus-themes-fg-yellow-faint :foreground))
 
   (set-face-attribute 'git-gutter:deleted nil
                       :background (face-attribute 'line-number :background)
-                      :foreground (face-attribute 'modus-themes-fg-red :foreground)))
+                      :foreground (face-attribute 'modus-themes-fg-red-faint :foreground)))
 
 (use-package treemacs
   :ensure t
