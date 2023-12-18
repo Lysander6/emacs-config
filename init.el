@@ -224,6 +224,8 @@
          (prog-mode . corfu-mode)
          (text-mode . corfu-echo-mode)
          (prog-mode . corfu-echo-mode))
+  :config
+  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)
   :bind
   ;; "M-h" - show docs for current candidate (prefix with "C-u" for
   ;; persistent window)
@@ -484,3 +486,8 @@
   :after (treemacs)
   :config
   (treemacs-load-theme "nerd-icons"))
+
+(use-package nerd-icons-corfu
+  :ensure t
+  :defer t
+  :after (nerd-icons))
