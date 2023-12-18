@@ -120,6 +120,10 @@
   :hook ((text-mode . electric-pair-mode)
 	 (prog-mode . electric-pair-mode)))
 
+(use-package eldoc
+  :defer t
+  :diminish)
+
 (use-package recentf
   :hook (text-mode prog-mode))
 
@@ -191,6 +195,7 @@
 (use-package evil-commentary
   :after evil
   :ensure t
+  :diminish
   :hook (text-mode prog-mode))
 
 (use-package editorconfig
@@ -289,7 +294,8 @@
 
 (use-package winum
   :ensure t
-  :hook after-init)
+  :hook after-init
+  :custom (winum-auto-setup-mode-line nil))
 
 (use-package general
   :ensure t
@@ -379,6 +385,7 @@
 
 (use-package which-key
   :ensure t
+  :diminish
   :hook after-init)
 
 (use-package embark
@@ -440,6 +447,7 @@
 
 (use-package git-gutter
   :ensure t
+  :diminish
   :hook (text-mode prog-mode)
   :custom
   (git-gutter:unchanged-sign " ")
@@ -505,3 +513,26 @@
   :ensure t
   :defer t
   :after (nerd-icons))
+
+(use-package spaceline
+  :ensure t
+  :hook (after-init . spaceline-spacemacs-theme)
+  :config
+  (setq spaceline-highlight-face-func #'spaceline-highlight-face-evil-state)
+
+  (set-face-attribute 'spaceline-evil-normal nil
+                      :background (face-attribute 'modus-themes-fg-blue-faint :foreground))
+  (set-face-attribute 'spaceline-evil-insert nil
+                      :background (face-attribute 'modus-themes-fg-green-faint :foreground))
+  (set-face-attribute 'spaceline-evil-visual nil
+                      :background (face-attribute 'modus-themes-fg-magenta-cooler :foreground)))
+
+(use-package anzu
+  :ensure t
+  :diminish
+  :hook (text-mode prog-mode)
+  :custom (anzu-cons-mode-line-p nil))
+
+(use-package evil-anzu
+  :ensure t
+  :after (evil anzu))
