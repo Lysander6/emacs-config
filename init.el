@@ -116,6 +116,12 @@
   :custom
   (hl-line-sticky-flag nil))
 
+(use-package autorevert
+  :defer t
+  :diminish
+  :custom
+  (auto-revert-mode-text "")) ;; diminish seems to not work in this case
+
 (use-package elec-pair
   :hook ((text-mode . electric-pair-mode)
 	 (prog-mode . electric-pair-mode)))
@@ -540,7 +546,11 @@
 (use-package dimmer
   :ensure t
   :hook after-init
+  :custom
+  (dimmer-use-colorspace :rgb)
   :config
   (dimmer-configure-hydra)
   (dimmer-configure-magit)
-  (dimmer-configure-which-key))
+  (dimmer-configure-which-key)
+  (add-to-list
+   'dimmer-exclusion-regexp-list "^\\*Help\\*$"))
