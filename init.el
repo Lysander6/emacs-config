@@ -536,3 +536,11 @@
 (use-package evil-anzu
   :ensure t
   :after (evil anzu))
+
+(use-package dimmer
+  :ensure t
+  :hook after-init
+  :config
+  (dimmer-configure-hydra)
+  (dimmer-configure-magit)
+  (dimmer-configure-which-key))
