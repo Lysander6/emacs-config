@@ -528,18 +528,21 @@
   :defer t
   :after (nerd-icons))
 
-(use-package spaceline
-  :ensure t
-  :hook (after-init . spaceline-spacemacs-theme)
-  :config
-  (setq spaceline-highlight-face-func #'spaceline-highlight-face-evil-state)
+;; (use-package spaceline
+;;   :ensure t
+;;   :hook (after-init . spaceline-spacemacs-theme)
+;;   :config
+;;   (setq spaceline-highlight-face-func #'spaceline-highlight-face-evil-state)
 
-  (set-face-attribute 'spaceline-evil-normal nil
-                      :background (face-attribute 'modus-themes-fg-blue-faint :foreground))
-  (set-face-attribute 'spaceline-evil-insert nil
-                      :background (face-attribute 'modus-themes-fg-green-faint :foreground))
-  (set-face-attribute 'spaceline-evil-visual nil
-                      :background (face-attribute 'modus-themes-fg-magenta-cooler :foreground)))
+;;   (set-face-attribute 'spaceline-evil-normal nil
+;;                       :background (face-attribute 'modus-themes-fg-blue-faint :foreground))
+;;   (set-face-attribute 'spaceline-evil-insert nil
+;;                       :background (face-attribute 'modus-themes-fg-green-faint :foreground))
+;;   (set-face-attribute 'spaceline-evil-visual nil
+;;                       :background (face-attribute 'modus-themes-fg-magenta-cooler :foreground)))
+
+;; TODO: create spaceline segment with branch name and text icon like in nvim
+;; https://github.com/TheBB/spaceline/blob/master/spaceline-segments.el#L127-L142
 
 (use-package anzu
   :ensure t
