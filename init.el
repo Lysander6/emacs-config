@@ -387,7 +387,15 @@
     "wk"    'evil-window-up
     "wh"    'evil-window-left
     "wl"    'evil-window-right
-    "wu"    'winner-undo))
+    "wu"    'winner-undo)
+
+  (general-define-key
+   :states '(normal)
+   :keymaps 'eglot-mode-map
+
+   ",=="    'eglot-format-buffer
+   ",rr"    'eglot-rename
+   ",aa"    'eglot-code-actions))
 
 (use-package which-key
   :ensure t
