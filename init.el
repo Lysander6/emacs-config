@@ -554,3 +554,11 @@
   (dimmer-configure-which-key)
   (add-to-list
    'dimmer-exclusion-regexp-list "^\\*Help\\*$"))
+
+(use-package avy
+  :ensure t
+  :after (evil)
+  :custom (avy-style 'post)
+  :bind (:map evil-normal-state-map
+              ("s" . avy-goto-char-2-below)
+              ("S" . avy-goto-char-2-above)))
