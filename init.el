@@ -583,3 +583,34 @@
 (use-package markdown-mode
   :ensure t
   :defer t)
+
+(use-package yasnippet-snippets
+  :ensure t)
+
+(use-package yasnippet
+  :ensure t
+  :after (yasnippet-snippets)
+  :hook ((text-mode . yas-minor-mode)
+         (prog-mode . yas-minor-mode))
+  :config (yas-reload-all))
+
+(use-package yasnippet-capf
+  :ensure t
+  :after (yasnippet))
+
+(use-package cape
+  :ensure t
+  :after (yasnippet-capf)
+  :config
+
+  ;; https://github.com/minad/corfu/wiki#making-a-cape-super-capf-for-eglot
+  (defun my/eglot-capf ()
+    (setq-local completion-at-point-functions
+                (list (cape-capf-super
+                       #'eglot-completion-at-point
+                       #'yasnippet-capf))))
+
+  ;; FIXME: now some (non-yas-snippet) completions are too eagerly
+  ;; automatically expanded - line word `new' in rust files
+
+  (add-hook 'eglot-managed-mode-hook #'my/eglot-capf))
