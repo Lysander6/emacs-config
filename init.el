@@ -118,9 +118,7 @@
 
 (use-package autorevert
   :defer t
-  :diminish
-  :custom
-  (auto-revert-mode-text "")) ;; diminish seems to not work in this case
+  :diminish 'auto-revert-mode)
 
 (use-package elec-pair
   :hook ((text-mode . electric-pair-mode)
