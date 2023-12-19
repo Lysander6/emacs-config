@@ -214,12 +214,11 @@
 (use-package orderless
   :ensure t
   :custom
-  (completion-styles '(orderless basic))
+  (completion-styles '(orderless flex basic))
   (completion-category-overrides '((file (styles basic partial-completion)))))
 
 (use-package corfu
   :ensure t
-  :pin gnu
   :custom
   (corfu-auto t)
   (corfu-auto-delay 0.0)
@@ -258,7 +257,6 @@
 
 (use-package vertico
   :ensure t
-  :pin gnu
   :hook after-init
   :bind
   (:map vertico-map
@@ -267,14 +265,12 @@
 
 (use-package marginalia
   :ensure t
-  :pin gnu
   :hook after-init
   :bind (:map minibuffer-local-map
               ("M-A" . marginalia-cycle)))
 
 (use-package consult
   :ensure t
-  :pin gnu
   :defer t
   :custom (consult-narrow-key "<")
   :hook (completion-list-mode . consult-preview-at-point-mode))
