@@ -562,3 +562,7 @@
   :bind (:map evil-normal-state-map
               ("s" . avy-goto-char-2-below)
               ("S" . avy-goto-char-2-above)))
+
+(use-package markdown-mode
+  :ensure t
+  :defer t)
