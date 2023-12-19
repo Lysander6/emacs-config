@@ -494,7 +494,7 @@
 
 (use-package treemacs-evil
   :ensure t
-  :after (evil treemacs))
+  :after (treemacs evil))
 
 (use-package nerd-icons
   :ensure t
