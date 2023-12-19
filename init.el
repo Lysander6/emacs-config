@@ -561,7 +561,13 @@
   (dimmer-configure-magit)
   (dimmer-configure-which-key)
   (add-to-list
-   'dimmer-exclusion-regexp-list "^\\*Help\\*$"))
+   'dimmer-exclusion-regexp-list "^\\*Help\\*$")
+  (add-to-list
+   'dimmer-exclusion-regexp-list "^\\*corfu doc")
+  (add-to-list
+   'dimmer-exclusion-regexp-list "^\\*eldoc")
+  (add-to-list
+   'dimmer-exclusion-regexp-list "^ \\*eglot doc\\*$"))
 
 (use-package avy
   :ensure t
