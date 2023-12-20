@@ -89,6 +89,7 @@
   :hook (text-mode prog-mode)
   :custom
   (display-line-numbers-width 3)
+  (column-number-mode t)
   ;; (display-line-numbers-minor-tick 5)
   ;; (display-line-numbers-major-tick 15)
   :config
