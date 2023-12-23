@@ -144,12 +144,15 @@
 (use-package treesit
   :config
   (setq treesit-language-source-alist
-        '((rust "https://github.com/tree-sitter/tree-sitter-rust")))
+        '((rust "https://github.com/tree-sitter/tree-sitter-rust")
+          (gdscript "https://github.com/PrestonKnopp/tree-sitter-gdscript")))
 
   (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-ts-mode))
 
-  (if (not (treesit-language-available-p 'rust))
-      (mapc #'treesit-install-language-grammar (mapcar #'car treesit-language-source-alist))))
+  (mapc #'treesit-install-language-grammar
+        (seq-remove #'treesit-language-available-p
+                    (mapcar #'car
+                            treesit-language-source-alist))))
 
 (use-package flyspell
   :custom
@@ -161,6 +164,11 @@
 
 (use-package eglot
   :commands (eglot)
+  :custom
+  ;; Effectively disabling eglot's log buffer greatly improves
+  ;; performance when working with Godot's LSP server. It might have
+  ;; similar effect when using other LSP servers
+  (eglot-events-buffer-size 0)
   :init
   (setq eglot-workspace-configuration
    '(:rust-analyzer
@@ -609,3 +617,10 @@
   ;; automatically expanded - line word `new' in rust files
 
   (add-hook 'eglot-managed-mode-hook #'my/eglot-capf))
+
+(use-package gdscript-mode
+  :ensure t
+  :defer t
+  :hook (gdscript-ts-mode . eglot-ensure)
+  :init
+  (add-to-list 'auto-mode-alist '("\\.gd\\'" . gdscript-ts-mode)))
