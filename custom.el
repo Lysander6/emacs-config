@@ -5,8 +5,9 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    '(cape consult copilot corfu corfu-terminal diminish dimmer dirvish
-          editorconfig embark-consult evil-anzu evil-collection
-          evil-commentary evil-terminal-cursor-changer general
+          editorconfig embark-consult evil-anzu
+          evil-collection evil-commentary evil-surround evil-terminal-cursor-changer
+          flymake-languagetool gdscript-mode general
           git-gutter magit marginalia markdown-mode nerd-icons-corfu
           orderless shrink-path spaceline treemacs-evil
           treemacs-nerd-icons vertico which-key winum yasnippet-capf
