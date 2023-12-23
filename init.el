@@ -629,3 +629,14 @@
   :hook (gdscript-ts-mode . eglot-ensure)
   :init
   (add-to-list 'auto-mode-alist '("\\.gd\\'" . gdscript-ts-mode)))
+
+(use-package flymake-languagetool
+  :ensure t
+  ;; get your languagetool server from: https://languagetool.org/download/
+  :custom
+  (flymake-languagetool-server-jar "/home/lysander/LanguageTool-20231220-snapshot/LanguageTool-6.4-SNAPSHOT/languagetool-server.jar")
+  ;; (flymake-languagetool-server-jar "/home/lysander/LibreGrammar-5.1/LibreGrammar-5.1/languagetool-server.jar")
+  (flymake-languagetool-language "en-GB")
+  :hook ((text-mode . flymake-languagetool-load)
+         (markdown-mode . flymake-languagetool-load)
+         (org-mode . flymake-languagetool-load)))
