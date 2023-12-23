@@ -309,7 +309,7 @@
 (use-package winum
   :ensure t
   :hook after-init
-  :custom (winum-auto-setup-mode-line nil))
+  :custom (winum-auto-setup-mode-line t))
 
 (use-package general
   :ensure t
