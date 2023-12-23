@@ -571,14 +571,14 @@
   (dimmer-configure-hydra)
   (dimmer-configure-magit)
   (dimmer-configure-which-key)
-  (add-to-list
-   'dimmer-exclusion-regexp-list "^\\*Help\\*$")
-  (add-to-list
-   'dimmer-exclusion-regexp-list "^\\*corfu doc")
-  (add-to-list
-   'dimmer-exclusion-regexp-list "^\\*eldoc")
-  (add-to-list
-   'dimmer-exclusion-regexp-list "^ \\*eglot doc\\*$"))
+
+  (mapc (lambda (regexp)
+          (add-to-list 'dimmer-buffer-exclusion-regexps regexp))
+        '("^\\*Help\\*$"
+          "^\\*corfu doc"
+          "^\\*eldoc"
+          "^ \\*eglot doc\\*$"
+          "^\\*Minibuf-[0-9]+\\*")))
 
 (use-package avy
   :ensure t
