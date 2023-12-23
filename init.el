@@ -211,6 +211,11 @@
   :diminish
   :hook (text-mode prog-mode))
 
+(use-package evil-surround
+  :after evil
+  :ensure t
+  :hook (text-mode prog-mode))
+
 (use-package editorconfig
   :ensure t
   :diminish
