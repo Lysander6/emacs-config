@@ -58,7 +58,10 @@
  visible-cursor nil
 
  ;; better `:' completions
- completion-in-region-function #'consult-completion-in-region)
+ completion-in-region-function #'consult-completion-in-region
+
+ mode-line-front-space " "
+ mode-line-end-spaces "")
 
 ;; disable menu and toolbar
 (menu-bar-mode -1)
