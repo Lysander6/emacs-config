@@ -148,9 +148,12 @@
   :config
   (setq treesit-language-source-alist
         '((rust "https://github.com/tree-sitter/tree-sitter-rust")
-          (gdscript "https://github.com/PrestonKnopp/tree-sitter-gdscript")))
+          (gdscript "https://github.com/PrestonKnopp/tree-sitter-gdscript")
+          (astro "https://github.com/virchau13/tree-sitter-astro")
+          (css "https://github.com/tree-sitter/tree-sitter-css")))
 
   (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-ts-mode))
+  (add-to-list 'auto-mode-alist '("\\.astro\\'" . astro-ts-mode))
 
   (mapc #'treesit-install-language-grammar
         (seq-remove #'treesit-language-available-p
@@ -475,7 +478,7 @@
   :diminish
   :hook (text-mode prog-mode)
   :custom
-  (git-gutter:unchanged-sign " ")
+  (git-gutter:unchanged-sign "")
   (git-gutter:added-sign "┃")
   (git-gutter:modified-sign "┃")
   (git-gutter:deleted-sign "▁")
@@ -643,3 +646,15 @@
   :hook ((text-mode . flymake-languagetool-load)
          (markdown-mode . flymake-languagetool-load)
          (org-mode . flymake-languagetool-load)))
+
+(use-package treesit-auto
+  :ensure t
+  :custom
+  (treesit-auto-install 'prompt)
+  :config
+  (treesit-auto-add-to-auto-mode-alist 'all)
+  (global-treesit-auto-mode))
+
+(use-package astro-ts-mode
+  :ensure t
+  :defer t)
