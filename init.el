@@ -66,6 +66,13 @@
 ;; disable menu and toolbar
 (menu-bar-mode -1)
 (tool-bar-mode -1)
+(scroll-bar-mode -1)
+
+;; fonts
+(set-face-attribute 'default nil
+                    :family "IosevkaTerm Nerd Font"
+                    :weight 'medium
+                    :height 120)
 
 (load-theme 'modus-vivendi)
 ;; (load-theme 'modus-vivendi-tinted)
@@ -75,10 +82,9 @@
   (let ((display-table (or buffer-display-table standard-display-table (make-display-table))))
     (set-display-table-slot display-table 5 ?█)
     (set-window-display-table (selected-window) display-table)))
-
-(set-face-attribute 'vertical-border nil :foreground (face-attribute 'line-number :background))
-
-(add-hook 'window-configuration-change-hook 'change-window-divider)
+(unless (display-graphic-p)
+  (set-face-attribute 'vertical-border nil :foreground (face-attribute 'line-number :background))
+  (add-hook 'window-configuration-change-hook 'change-window-divider))
 
 (use-package package
   :config
@@ -105,6 +111,7 @@
     (display-line-numbers-mode)))
 
 (use-package display-fill-column-indicator
+  :unless (display-graphic-p)
   :custom (display-fill-column-indicator-character ?│)
   :config
   (add-hook 'display-fill-column-indicator-mode-hook
