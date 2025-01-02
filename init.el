@@ -251,10 +251,16 @@
     "s"     (cons "search" (make-sparse-keymap))
     "ss"    'consult-line
 
-    "t"     (cons "toggle" (make-sparse-keymap))
-    "tf"    'display-fill-column-indicator-mode
-    "ti"    'eglot-inlay-hints-mode
-    "tl"    'hl-line-mode
+    "T"     (cons "toggle" (make-sparse-keymap))
+    "Tf"    'display-fill-column-indicator-mode
+    "Ti"    'eglot-inlay-hints-mode
+    "Tl"    'hl-line-mode
+
+    "t"     (cons "tabs" (make-sparse-keymap))
+    "td"    'tab-close
+    "tm"    'tab-move
+    "tn"    'tab-new
+    "tt"    'other-tab-prefix
 
     "w"     (cons "windows" (make-sparse-keymap))
     "ww"    'other-window
