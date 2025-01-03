@@ -316,6 +316,19 @@
 ;;         :foreground
 ;;         ,(face-attribute 'modus-themes-fg-red-faint :foreground))))))
 
+(use-package gptel
+  :ensure t
+  :pin melpa
+  :defer t
+  :custom
+  (gptel-backend (gptel-make-openai "GitHub Models"
+                   :host "models.inference.ai.azure.com"
+                   :endpoint "/chat/completions"
+                   :stream t
+                   :key (getenv "MY_GPTEL_GITHUB_MODELS_KEY")
+                   :models '(gpt-4o-mini gpt-4o)))
+  (gptel-model 'gpt-4o-mini))
+
 ;; Built-in code folding
 (use-package hideshow
   :hook (prog-mode . hs-minor-mode))
