@@ -54,10 +54,12 @@ flycheck_*.el
 
 # End of https://www.toptal.com/developers/gitignore/api/emacs
 
-recentf
-transient
-projects
-eln-cache
-tree-sitter
 .cache
 .lsp-session-v1
+bookmarks
+eln-cache
+history
+projects
+recentf
+transient
+tree-sitter
