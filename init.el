@@ -144,6 +144,20 @@
   :hook ((text-mode . electric-pair-mode)
 	 (prog-mode . electric-pair-mode)))
 
+(use-package embark
+  :ensure t
+  :pin melpa
+  :defer t
+  :bind
+  (:map minibuffer-local-map ;; :map vertico-map
+        ("M-o" . embark-act)))
+
+(use-package embark-consult
+  :ensure t
+  :pin melpa
+  :defer t
+  :hook (embark-collect-mode . consult-preview-at-point-mode))
+
 (use-package evil
   :ensure t
   :pin melpa
