@@ -112,6 +112,30 @@
   (consult-narrow-key "<")
   (consult-preview-partial-size 0 "Do not enable major modes in previews."))
 
+(use-package consult-gh
+  :after consult
+  :ensure t
+  :pin melpa
+  :custom
+  (consult-gh-default-clone-directory "~/workspace/")
+  (consult-gh-favorite-orgs-list '("Ringier-Axel-Springer-PL"))
+  ;; (consult-gh-repo-maxnum 1000) ;; append something like ` -- -L 1000' to the search query, instead of changing the default value
+  )
+
+(use-package consult-gh-embark
+  :after consult-gh
+  :ensure t
+  :pin melpa
+  :config
+  (consult-gh-embark-mode +1))
+
+(use-package consult-gh-forge
+  :after consult-gh
+  :ensure t
+  :pin melpa
+  :config
+  (consult-gh-forge-mode +1))
+
 (defun my/consult-ripgrep (&optional dir given-initial)
   (interactive "P")
   (let ((initial
