@@ -189,7 +189,9 @@
                        ;; after M-o use C-h to get a vertico
                        ;; completion minibuffer
                        embark-highlight-indicator
-                       embark-isearch-highlight-indicator)))
+                       embark-isearch-highlight-indicator))
+  ;; (embark-prompter #'embark-completing-read-prompter)
+  )
 
 (use-package embark-consult
   :ensure t
