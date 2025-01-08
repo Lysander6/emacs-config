@@ -112,6 +112,14 @@
   (consult-narrow-key "<")
   (consult-preview-partial-size 0 "Do not enable major modes in previews."))
 
+(defun my/consult-ripgrep (&optional dir given-initial)
+  (interactive "P")
+  (let ((initial
+         (or given-initial
+             (when (use-region-p)
+               (buffer-substring-no-properties (region-beginning) (region-end))))))
+    (consult-ripgrep dir initial)))
+
 (use-package display-fill-column-indicator
   :unless (display-graphic-p)
   :defer t
@@ -263,6 +271,7 @@
     "qQ"    'save-buffers-kill-emacs
 
     "s"     (cons "search" (make-sparse-keymap))
+    "sp"    'my/consult-ripgrep
     "ss"    'consult-line
 
     "T"     (cons "toggle" (make-sparse-keymap))
