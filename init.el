@@ -113,6 +113,7 @@
   (consult-preview-partial-size 0 "Do not enable major modes in previews."))
 
 (use-package consult-gh
+  :if (executable-find "gh")
   :after consult
   :ensure t
   :pin melpa
