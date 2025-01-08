@@ -158,7 +158,14 @@
   :defer t
   :bind
   (:map minibuffer-local-map ;; :map vertico-map
-        ("M-o" . embark-act)))
+        ("M-o" . embark-act))
+  :custom
+  (embark-indicators '(embark-minimal-indicator
+                       ;; do not pop up buffer with all actions -
+                       ;; after M-o use C-h to get a vertico
+                       ;; completion minibuffer
+                       embark-highlight-indicator
+                       embark-isearch-highlight-indicator)))
 
 (use-package embark-consult
   :ensure t
