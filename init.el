@@ -221,6 +221,11 @@
   (flyspell-default-dictionary "en_GB")
   (flyspell-issue-welcome-flag nil))
 
+(use-package forge
+  :ensure t
+  :pin melpa
+  :after magit)
+
 (use-package general
   :ensure t
   :pin melpa
