@@ -317,9 +317,11 @@
     "Tf"    'display-fill-column-indicator-mode
     "Ti"    'eglot-inlay-hints-mode
     "Tl"    'hl-line-mode
+    "Tn"    'display-line-numbers-mode
 
     "t"     (cons "tabs" (make-sparse-keymap))
     "td"    'tab-close
+    "th"    'tab-bar-mode
     "tm"    'tab-move
     "tn"    'tab-new
     "tt"    'other-tab-prefix
