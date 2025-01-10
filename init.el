@@ -504,10 +504,12 @@
 (use-package treesit
   :config
   (setopt treesit-language-source-alist
-          '((javascript "https://github.com/tree-sitter/tree-sitter-javascript")
+          '((html "https://github.com/tree-sitter/tree-sitter-html")
+            (javascript "https://github.com/tree-sitter/tree-sitter-javascript")
             (jsdoc "https://github.com/tree-sitter/tree-sitter-jsdoc")
             (rust "https://github.com/tree-sitter/tree-sitter-rust")))
 
+  (add-to-list 'auto-mode-alist '("\\.jqtpl\\'" . html-ts-mode))
   (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-ts-mode))
   (add-to-list 'auto-mode-alist '("\\.js\\'" . js-ts-mode))
 
