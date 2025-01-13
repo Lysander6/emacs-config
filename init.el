@@ -117,6 +117,7 @@
   :after consult
   :ensure t
   :pin melpa
+  :defer t
   :custom
   (consult-gh-default-clone-directory "~/workspace/")
   (consult-gh-favorite-orgs-list '("Ringier-Axel-Springer-PL"))
