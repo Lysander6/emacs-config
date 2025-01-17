@@ -529,11 +529,13 @@
           '((html "https://github.com/tree-sitter/tree-sitter-html")
             (javascript "https://github.com/tree-sitter/tree-sitter-javascript")
             (jsdoc "https://github.com/tree-sitter/tree-sitter-jsdoc")
+            (json "https://github.com/tree-sitter/tree-sitter-json")
             (rust "https://github.com/tree-sitter/tree-sitter-rust")))
 
   (add-to-list 'auto-mode-alist '("\\.jqtpl\\'" . html-ts-mode))
   (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-ts-mode))
   (add-to-list 'auto-mode-alist '("\\.js\\'" . js-ts-mode))
+  (add-to-list 'auto-mode-alist '("\\.json\\'" . json-ts-mode))
 
   (mapc #'treesit-install-language-grammar
         (seq-remove #'treesit-language-available-p
