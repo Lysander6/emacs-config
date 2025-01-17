@@ -463,6 +463,10 @@
   :custom
   (completion-styles '(orderless basic)))
 
+(use-package paren
+  :custom
+  (show-paren-context-when-offscreen t))
+
 (use-package recentf
   :hook (text-mode prog-mode))
 
