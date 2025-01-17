@@ -381,18 +381,34 @@
 ;;         :foreground
 ;;         ,(face-attribute 'modus-themes-fg-red-faint :foreground))))))
 
+(defun my/read-copilot-key ()
+  (let* ((json-object-type 'hash-table)
+         (json-array-type 'list)
+         (json-key-type 'string)
+         ;; piggyback on the copilot.el and custom token retrieval script (TODO)
+         ;; mkdir -p ~/.config/my-github-copilot/
+         ;; curl -XGET -H "authorization: Bearer $(jq -r '.["github.com"].oauth_token' ~/.config/github-copilot/hosts.json)" -H 'content-type: application/json' https://api.github.com/copilot_internal/v2/token > ~/.config/my-github-copilot/token.json
+         (json (json-read-file "~/.config/my-github-copilot/token.json"))
+         (oauth-token (gethash "token" json)))
+    oauth-token))
+
 (use-package gptel
   :ensure t
   :pin melpa
   :defer t
   :custom
-  (gptel-backend (gptel-make-openai "GitHub Models"
-                   :host "models.inference.ai.azure.com"
+  (gptel-backend (gptel-make-openai "Github Copilot"
+                   :header `(("Authorization" . ,(concat "Bearer " (my/read-copilot-key)))
+                             ("Content-Type" . "application/json")
+                             ("Copilot-Integration-Id" . "vscode-chat")
+                             ("Editor-Version" . "emacs"))
+                   :host "api.business.githubcopilot.com"
                    :endpoint "/chat/completions"
                    :stream t
-                   :key (getenv "MY_GPTEL_GITHUB_MODELS_KEY")
-                   :models '(gpt-4o-mini gpt-4o)))
-  (gptel-model 'gpt-4o-mini))
+                   :key #'my/read-copilot-key
+                   :models '(claude-3.5-sonnet gpt-4o gpt-4o-mini)))
+  (gptel-api-key #'my/read-copilot-key)
+  (gptel-model 'claude-3.5-sonnet))
 
 ;; Built-in code folding
 (use-package hideshow
