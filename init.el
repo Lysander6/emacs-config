@@ -457,6 +457,14 @@
             (bg-tab-current bg-lavender) ;; bg-active)
             (bg-tab-other bg-dim))))
 
+(use-package nerd-icons-completion
+  :ensure t
+  :pin melpa
+  :after marginalia
+  :config
+  (nerd-icons-completion-mode)
+  (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
+
 (use-package orderless
   :ensure t
   :pin melpa
