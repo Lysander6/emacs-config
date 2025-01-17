@@ -254,6 +254,11 @@
   :pin melpa
   :after magit)
 
+(use-package format-all
+  :defer t
+  :ensure t
+  :pin melpa)
+
 (use-package general
   :ensure t
   :pin melpa
