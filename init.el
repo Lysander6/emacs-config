@@ -156,6 +156,13 @@
   ;; :hook prog-mode
   )
 
+(use-package display-line-numbers
+  :defer t
+  ;; :hook (text-mode prog-mode)
+  :custom
+  ;; (display-line-numbers-type 'relative)
+  (display-line-numbers-width 3))
+
 (use-package editorconfig
   :hook (text-mode prog-mode))
 
@@ -420,7 +427,8 @@
   :hook (prog-mode . hs-minor-mode))
 
 (use-package hl-line
-  :hook (text-mode prog-mode)
+  :defer t
+  ;; :hook (text-mode prog-mode)
   :custom
   (hl-line-sticky-flag nil))
 
@@ -455,7 +463,11 @@
   (setopt modus-themes-common-palette-overrides
           '((bg-tab-bar bg-main)
             (bg-tab-current bg-lavender) ;; bg-active)
-            (bg-tab-other bg-dim))))
+            (bg-tab-other bg-dim)
+            (fg-line-number-inactive "gray50")
+            (fg-line-number-active fg-main)
+            (bg-line-number-inactive unspecified)
+            (bg-line-number-active unspecified))))
 
 (use-package nerd-icons-completion
   :ensure t
