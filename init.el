@@ -146,6 +146,9 @@
   :custom
   (corfu-auto nil))
 
+(use-package corfu-popupinfo-mode
+  :hook corfu-mode)
+
 (defun my/consult-ripgrep (&optional dir given-initial)
   (interactive "P")
   (let ((initial
