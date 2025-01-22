@@ -138,6 +138,14 @@
   :config
   (consult-gh-forge-mode +1))
 
+(use-package corfu
+  :ensure t
+  :pin melpa
+  :init
+  (global-corfu-mode)
+  :custom
+  (corfu-auto nil))
+
 (defun my/consult-ripgrep (&optional dir given-initial)
   (interactive "P")
   (let ((initial
