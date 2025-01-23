@@ -58,7 +58,7 @@ flycheck_*.el
 .lsp-session-v1
 bookmarks
 eln-cache
-forge-database.sqlite
+forge-database*
 history
 projects
 recentf
