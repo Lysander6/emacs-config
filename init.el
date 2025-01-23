@@ -555,12 +555,16 @@
             (jsdoc "https://github.com/tree-sitter/tree-sitter-jsdoc")
             (json "https://github.com/tree-sitter/tree-sitter-json")
             (rust "https://github.com/tree-sitter/tree-sitter-rust")
+            (tsx . ("https://github.com/tree-sitter/tree-sitter-typescript" "master" "tsx/src"))
+            (typescript . ("https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src"))
             (yaml "https://github.com/tree-sitter-grammars/tree-sitter-yaml")))
 
   (add-to-list 'auto-mode-alist '("\\.jqtpl\\'" . html-ts-mode))
-  (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-ts-mode))
   (add-to-list 'auto-mode-alist '("\\.js\\'" . js-ts-mode))
   (add-to-list 'auto-mode-alist '("\\.json\\'" . json-ts-mode))
+  (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-ts-mode))
+  (add-to-list 'auto-mode-alist '("\\.ts\\'" . typescript-ts-mode))
+  (add-to-list 'auto-mode-alist '("\\.tsx\\'" . tsx-ts-mode))
   (add-to-list 'auto-mode-alist '("\\.yaml\\'" . yaml-ts-mode))
 
   (mapc #'treesit-install-language-grammar
