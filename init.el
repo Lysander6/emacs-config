@@ -94,6 +94,11 @@
 	       '("melpa" . "https://melpa.org/packages/"))
   (package-initialize t))
 
+(use-package astro-ts-mode
+  :ensure t
+  :pin melpa
+  :defer t)
+
 (use-package avy
   :ensure t
   :pin melpa
@@ -568,7 +573,9 @@
 (use-package treesit
   :config
   (setopt treesit-language-source-alist
-          '((html "https://github.com/tree-sitter/tree-sitter-html")
+          '((astro "https://github.com/virchau13/tree-sitter-astro")
+            (css "https://github.com/tree-sitter/tree-sitter-css")
+            (html "https://github.com/tree-sitter/tree-sitter-html")
             (javascript "https://github.com/tree-sitter/tree-sitter-javascript")
             (jsdoc "https://github.com/tree-sitter/tree-sitter-jsdoc")
             (json "https://github.com/tree-sitter/tree-sitter-json")
