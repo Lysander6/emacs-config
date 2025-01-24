@@ -143,6 +143,13 @@
   :config
   (consult-gh-forge-mode +1))
 
+(use-package copilot
+  :ensure t
+  :defer t
+  :vc (:url "https://github.com/copilot-emacs/copilot.el"
+            :rev :newest
+            :branch "main"))
+
 (use-package corfu
   :ensure t
   :pin melpa
