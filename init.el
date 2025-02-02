@@ -28,10 +28,10 @@
 
  ;; faster scrolling with a mouse wheel
  mouse-wheel-scroll-amount '(3
-			     ((shift) . hscroll)
-			     ((meta))
-			     ((control meta) . global-text-scale)
-			     ((control) . text-scale))
+                             ((shift) . hscroll)
+                             ((meta))
+                             ((control meta) . global-text-scale)
+                             ((control) . text-scale))
 
  read-extended-command-predicate #'command-completion-default-include-p
 
@@ -91,7 +91,7 @@
 (use-package package
   :config
   (add-to-list 'package-archives
-	       '("melpa" . "https://melpa.org/packages/"))
+               '("melpa" . "https://melpa.org/packages/"))
   (package-initialize t))
 
 (use-package astro-ts-mode
@@ -260,7 +260,7 @@ Example:
 
 (use-package elec-pair
   :hook ((text-mode . electric-pair-mode)
-	 (prog-mode . electric-pair-mode)))
+         (prog-mode . electric-pair-mode)))
 
 (use-package embark
   :ensure t
@@ -612,7 +612,7 @@ Returns the key as string or nil if unsuccessful."
     (define-key magit-section-mode-map (kbd "<normal-state> M-2") nil)
     (define-key magit-section-mode-map (kbd "<normal-state> M-3") nil)
     (define-key magit-section-mode-map (kbd "<normal-state> M-4") nil))
-  
+
   (add-hook 'magit-section-mode-hook 'my/unbind-meta-nb-keys-in-magit-section-mode))
 
 (use-package marginalia
@@ -702,7 +702,7 @@ Returns the key as string or nil if unsuccessful."
                     (lambda () (when (fboundp 'vc-git--current-branch)
                                  (if-let* ((branch (vc-git--current-branch)))
                                      (propertize (format " %s " branch)
-                                                 'face 'custom-comment)))) 
+                                                 'face 'custom-comment))))
                     tab-bar-format-global))
   (tab-bar-new-tab-to 'rightmost)
   (tab-bar-tab-name-format-functions '(;; tab-bar-tab-name-format-hints
@@ -753,8 +753,8 @@ Returns the key as string or nil if unsuccessful."
   :hook after-init
   :bind
   (:map vertico-map
-	("C-j" . vertico-next)
-	("C-k" . vertico-previous)))
+        ("C-j" . vertico-next)
+        ("C-k" . vertico-previous)))
 
 (use-package which-key
   :hook after-init)
