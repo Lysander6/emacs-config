@@ -143,12 +143,66 @@
   :config
   (consult-gh-forge-mode +1))
 
+(defun my/read-json-key (file-path key-path)
+  "Read nested value from JSON file at FILE-PATH using KEY-PATH.
+FILE-PATH should be a string representing path to JSON file.
+KEY-PATH can be either a single key or a list of keys for nested objects.
+
+Example:
+  (my/read-json-key \"~/.config/config.json\" '(\"user\" \"settings\" \"theme\"))
+  (my/read-json-key \"~/.config/config.json\" \"simple_key\")"
+  (let ((expanded-path (expand-file-name file-path)))
+    (condition-case err
+        (if (not (file-exists-p expanded-path))
+            (error "JSON file not found at %s" expanded-path)
+          (let ((json-object-type 'hash-table)
+                (json-array-type 'list)
+                (json-key-type 'string))
+            (let* ((json-data (json-read-file expanded-path))
+                   (keys (cond
+                          ((stringp key-path) (list key-path))
+                          ((listp key-path) key-path)
+                          (t (error "KEY-PATH must be a string or list of strings"))))
+                   (value (seq-reduce
+                          (lambda (obj key)
+                            (cond
+                              ((null obj) nil)
+                              ((hash-table-p obj) (gethash key obj))
+                              (t (error "Cannot traverse through non-object value at %s"
+                                      (seq-take keys (seq-position keys key))))))
+                          keys
+                          json-data)))
+              (or value
+                  (error "Path %s not found in JSON file"
+                         (if (listp key-path)
+                             (string-join key-path " -> ")
+                           key-path))))))
+      (error (error "Error reading JSON file: %s" err)))))
+
+
+(defconst my/github-oauth-token-file-path "~/.config/github-copilot/hosts.json")
+
+(defun my/read-github-oauth-token ()
+  (my/read-json-key my/github-oauth-token-file-path '("github.com" "oauth_token")))
+
+(defvar my/github-oauth-token
+  (with-demoted-errors "Error reading GitHub OAuth token: %S"
+    (my/read-github-oauth-token))
+  "GitHub OAuth token.")
+
+(defun my/update-github-oauth-token ()
+  "Update the GitHub OAuth token value after login."
+  (setq my/github-oauth-token (my/read-github-oauth-token)))
+
 (use-package copilot
   :ensure t
   :defer t
+  :commands (copilot-login)
   :vc (:url "https://github.com/copilot-emacs/copilot.el"
             :rev :newest
-            :branch "main"))
+            :branch "main")
+  :config
+  (advice-add 'copilot-login :after #'my/update-github-oauth-token))
 
 (use-package corfu
   :ensure t
@@ -416,70 +470,29 @@
 ;;         :foreground
 ;;         ,(face-attribute 'modus-themes-fg-red-faint :foreground))))))
 
-(defun my/read-json-key (file-path key-path)
-  "Read nested value from JSON file at FILE-PATH using KEY-PATH.
-FILE-PATH should be a string representing path to JSON file.
-KEY-PATH can be either a single key or a list of keys for nested objects.
+(defconst my/github-copilot-token-file-path "~/.config/my-github-copilot/token.json")
 
-Example:
-  (my/read-json-key \"~/.config/config.json\" '(\"user\" \"settings\" \"theme\"))
-  (my/read-json-key \"~/.config/config.json\" \"simple_key\")"
-  (let ((expanded-path (expand-file-name file-path)))
-    (condition-case err
-        (if (not (file-exists-p expanded-path))
-            (error "JSON file not found at %s" expanded-path)
-          (let ((json-object-type 'hash-table)
-                (json-array-type 'list)
-                (json-key-type 'string))
-            (let* ((json-data (json-read-file expanded-path))
-                   (keys (cond
-                          ((stringp key-path) (list key-path))
-                          ((listp key-path) key-path)
-                          (t (error "KEY-PATH must be a string or list of strings"))))
-                   (value (seq-reduce
-                          (lambda (obj key)
-                            (cond
-                              ((null obj) nil)
-                              ((hash-table-p obj) (gethash key obj))
-                              (t (error "Cannot traverse through non-object value at %s"
-                                      (seq-take keys (seq-position keys key))))))
-                          keys
-                          json-data)))
-              (or value
-                  (error "Path %s not found in JSON file"
-                         (if (listp key-path)
-                             (string-join key-path " -> ")
-                           key-path))))))
-      (error (error "Error reading JSON file: %s" err)))))
-
-(defvar my/github-oauth-token
-  (with-demoted-errors "Error reading GitHub OAuth token: %S"
-    (my/read-json-key "~/.config/github-copilot/hosts.json" '("github.com" "oauth_token")))
-  "GitHub OAuth token.")
-
-(defvar my/github-copilot-token-file-path "~/.config/my-github-copilot/token.json")
-
-;; TODO: don't read these at startup, but only when they are needed
-;; TODO: also consider `add-variable-watcher'
-
-(defvar my/github-copilot-token
-  (with-demoted-errors "Error reading GitHub Copilot token expiration timestamp: %S"
-    (my/read-json-key my/github-copilot-token-file-path "token"))
+(defvar my/github-copilot-token nil
   "GitHub Copilot token.")
 
-(defvar my/github-copilot-token-expires-at
-  (with-demoted-errors "Error reading GitHub Copilot token expiration timestamp: %S"
-    (my/read-json-key my/github-copilot-token-file-path "expires_at"))
+(defvar my/github-copilot-token-expires-at nil
   "GitHub Copilot token expiration timestamp.")
 
 (defun my/expired-p (timestamp)
   "Check if TIMESTAMP (Unix timestamp) is in the past."
   (> (time-convert nil 'integer) timestamp))
 
+(defun my/ensure-directory-exists (file-path)
+  (let ((directory (file-name-directory (expand-file-name file-path))))
+    (unless (file-exists-p directory)
+      (make-directory directory t))))
+
 (defun my/fetch-github-copilot-token (auth-token)
   "Fetch GitHub Copilot token using AUTH-TOKEN for authentication.
 Returns t if successful, nil otherwise."
   (let ((output-file (expand-file-name my/github-copilot-token-file-path)))
+    (my/ensure-directory-exists my/github-copilot-token-file-path)
+
     (condition-case err
         (let ((exit-code
                (call-process "curl" nil nil nil
@@ -570,7 +583,10 @@ Returns the key as string or nil if unsuccessful."
                               :output-cost 0.60
                               :cutoff-date "2023-10"))))
   (gptel-api-key #'my/read-github-copilot-key)
-  (gptel-model 'claude-3.5-sonnet))
+  (gptel-model 'claude-3.5-sonnet)
+  :config
+  (unless my/github-oauth-token
+    (copilot-login)))
 
 ;; Built-in code folding
 (use-package hideshow
