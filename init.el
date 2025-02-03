@@ -472,10 +472,14 @@ Example:
 
 (defconst my/github-copilot-token-file-path "~/.config/my-github-copilot/token.json")
 
-(defvar my/github-copilot-token nil
+(defvar my/github-copilot-token
+  (with-demoted-errors "Error reading GitHub Copilot token: %S"
+    (my/read-json-key my/github-copilot-token-file-path "token"))
   "GitHub Copilot token.")
 
-(defvar my/github-copilot-token-expires-at nil
+(defvar my/github-copilot-token-expires-at
+  (with-demoted-errors "Error reading GitHub Copilot token expiration timestamp: %S"
+    (my/read-json-key my/github-copilot-token-file-path "expires_at"))
   "GitHub Copilot token expiration timestamp.")
 
 (defun my/expired-p (timestamp)
