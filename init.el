@@ -197,7 +197,7 @@ Example:
 (use-package copilot
   :ensure t
   :defer t
-  :commands (copilot-login)
+  :commands (copilot-install-server copilot-login)
   :vc (:url "https://github.com/copilot-emacs/copilot.el"
             :rev :newest
             :branch "main")
@@ -596,6 +596,7 @@ Returns the key as string or nil if unsuccessful."
   (gptel-model 'claude-3.5-sonnet)
   :config
   (unless my/github-oauth-token
+    (copilot-install-server)
     (copilot-login)))
 
 ;; Built-in code folding
