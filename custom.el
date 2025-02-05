@@ -6,11 +6,11 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    '(astro-ts-mode avy consult-gh-embark consult-gh-forge copilot corfu
-                   evil-collection evil-commentary evil-surround
-                   evil-terminal-cursor-changer format-all general
-                   git-gutter gptel marginalia nerd-icons-completion
-                   nerd-icons-corfu orderless smartparens solaire-mode
-                   vertico winum))
+                   evil-collection evil-commentary evil-goggles
+                   evil-surround evil-terminal-cursor-changer
+                   format-all general git-gutter gptel marginalia
+                   nerd-icons-completion nerd-icons-corfu orderless
+                   smartparens solaire-mode vertico winum))
  '(package-vc-selected-packages
    '((copilot :url "https://github.com/copilot-emacs/copilot.el" :branch
               "main")))

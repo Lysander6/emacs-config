@@ -309,6 +309,12 @@ Example:
   :pin melpa
   :hook (text-mode prog-mode))
 
+(use-package evil-goggles
+  :ensure t
+  :pin melpa
+  :hook (text-mode prog-mode)
+  :config (evil-goggles-use-diff-faces))
+
 (use-package evil-surround
   :ensure t
   :pin melpa
