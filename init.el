@@ -558,6 +558,9 @@ Returns the key as string or nil if unsuccessful."
   :pin melpa
   :defer t
   :custom
+  ;; Consult [CopilotChat.nvim README](https://github.com/CopilotC-Nvim/CopilotChat.nvim/blob/dbce8a231d1ac72c68ce00b86b415c9304417102/README.md?plain=1#L244-L248)
+  ;; for the model names and [gptel.el source](https://github.com/karthink/gptel/blob/4ab198a904f1706a8daede1145386db4dc960aa1/gptel-anthropic.el#L390)
+  ;; for their properties.
   (gptel-backend (gptel-make-openai "Github Copilot"
                    :header (lambda () (when-let (key (my/read-github-copilot-key))
                                         `(("Authorization" . ,(concat "Bearer " key))
@@ -576,6 +579,13 @@ Returns the key as string or nil if unsuccessful."
                               :input-cost 3
                               :output-cost 15
                               :cutoff-date "2024-04")
+                             (gemini-2.0-flash-001
+                              :description "Next generation features, superior speed, native tool use"
+                              :capabilities (tool-use json media)
+                              :mime-types ("image/png" "image/jpeg" "image/webp" "image/heic" "image/heif"
+                                           "application/pdf" "text/plain" "text/csv" "text/html")
+                              :context-window 1000
+                              :cutoff-date "2024-12")
                              (gpt-4o
                               :description "Advanced model for complex tasks; cheaper & faster than GPT-Turbo"
                               :capabilities (media tool-use json url)
@@ -591,7 +601,24 @@ Returns the key as string or nil if unsuccessful."
                               :context-window 128
                               :input-cost 0.15
                               :output-cost 0.60
-                              :cutoff-date "2023-10"))))
+                              :cutoff-date "2023-10")
+                             (o1
+                              :description "Reasoning model designed to solve hard problems across domains"
+                              :capabilities (nosystem media reasoning)
+                              :mime-types ("image/jpeg" "image/png" "image/gif" "image/webp")
+                              :context-window 200
+                              :input-cost 15
+                              :output-cost 60
+                              :cutoff-date "2023-10"
+                              :request-params (:stream :json-false))
+                             (o3-mini
+                              :description "High intelligence at the same cost and latency targets of o1-mini"
+                              :context-window 200
+                              :input-cost 3
+                              :output-cost 12
+                              :cutoff-date "2023-10"
+                              :capabilities (nosystem reasoning)
+                              :request-params (:stream :json-false)))))
   (gptel-api-key #'my/read-github-copilot-key)
   (gptel-model 'claude-3.5-sonnet)
   :config
