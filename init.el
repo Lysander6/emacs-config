@@ -694,6 +694,12 @@ Returns the key as string or nil if unsuccessful."
   :custom
   (completion-styles '(orderless basic)))
 
+(use-package org
+  :custom
+  (org-capture-templates
+   '(("a" "Prawa Autorskie - Unreleased" entry (file+headline "~/org/work/rasp/prawa-autorskie/unreleased.org" "Unreleased")
+      "* %i%?\n"))))
+
 (use-package paren
   :custom
   (show-paren-context-when-offscreen t))
