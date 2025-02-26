@@ -180,10 +180,11 @@ Example:
       (error (error "Error reading JSON file: %s" err)))))
 
 
-(defconst my/github-oauth-token-file-path "~/.config/github-copilot/hosts.json")
+(defconst my/github-oauth-token-file-path "~/.config/github-copilot/apps.json")
 
 (defun my/read-github-oauth-token ()
-  (my/read-json-key my/github-oauth-token-file-path '("github.com" "oauth_token")))
+  (let ((oauth-token-key (car (hash-table-keys (my/read-json-key my/github-oauth-token-file-path '())))))
+    (my/read-json-key my/github-oauth-token-file-path `(,oauth-token-key "oauth_token"))))
 
 (defvar my/github-oauth-token
   (with-demoted-errors "Error reading GitHub OAuth token: %S"
@@ -579,6 +580,22 @@ Returns the key as string or nil if unsuccessful."
                               :input-cost 3
                               :output-cost 15
                               :cutoff-date "2024-04")
+                             (claude-3.7-sonnet
+                              :description "Hybrid model capable of standard thinking and extended thinking modes"
+                              :capabilities (media tool-use cache)
+                              :mime-types ("image/jpeg" "image/png" "image/gif" "image/webp" "application/pdf")
+                              :context-window 200
+                              :input-cost 3
+                              :output-cost 15
+                              :cutoff-date "2025-02")
+                             (claude-3.7-sonnet-thought
+                              :description "Hybrid model capable of standard thinking and extended thinking modes"
+                              :capabilities (media cache)
+                              :mime-types ("image/jpeg" "image/png" "image/gif" "image/webp" "application/pdf")
+                              :context-window 200
+                              :input-cost 3
+                              :output-cost 15
+                              :cutoff-date "2025-02")
                              (gemini-2.0-flash-001
                               :description "Next generation features, superior speed, native tool use"
                               :capabilities (tool-use json media)
@@ -620,7 +637,7 @@ Returns the key as string or nil if unsuccessful."
                               :capabilities (nosystem reasoning)
                               :request-params (:stream :json-false)))))
   (gptel-api-key #'my/read-github-copilot-key)
-  (gptel-model 'claude-3.5-sonnet)
+  (gptel-model 'claude-3.7-sonnet)
   :config
   (unless my/github-oauth-token
     (copilot-install-server)
