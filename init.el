@@ -197,11 +197,9 @@ Example:
 
 (use-package copilot
   :ensure t
+  :pin melpa
   :defer t
   :commands (copilot-install-server copilot-login)
-  :vc (:url "https://github.com/copilot-emacs/copilot.el"
-            :rev :newest
-            :branch "main")
   :config
   (advice-add 'copilot-login :after #'my/update-github-oauth-token))
 
