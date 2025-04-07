@@ -143,6 +143,29 @@
   :config
   (consult-gh-forge-mode +1))
 
+(defconst my/github-namespaces
+  '("business"
+    "fakt"
+    "omp"
+    "widgets-platform")
+  "List of GitHub repository namespaces to select from.")
+
+(defconst my/github-organization "Ringier-Axel-Springer-PL"
+  "The GitHub organization to search repositories in.")
+
+(defvar consult-gh-repo-action)
+
+(defun my/github-clone-repo-from-namespace ()
+  "Clone a repository from a selected namespace in GitHub organization.
+User selects namespace from a fixed list, then chooses a repository to clone."
+  (interactive)
+  (let* ((namespace (completing-read "Select namespace: " my/github-namespaces nil t))
+         (query-string (format "props.namespace:%s -- --owner %s --limit 100#"
+                               namespace
+                               my/github-organization))
+         (consult-gh-repo-action #'consult-gh--repo-clone-action))
+    (consult-gh-search-repos query-string)))
+
 (defun my/read-json-key (file-path key-path)
   "Read nested value from JSON file at FILE-PATH using KEY-PATH.
 FILE-PATH should be a string representing path to JSON file.
