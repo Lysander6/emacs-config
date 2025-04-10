@@ -700,6 +700,28 @@ Returns the key as string or nil if unsuccessful."
   :pin melpa
   :mode ("\\.md\\'" . gfm-mode))
 
+(use-package mcp-hub
+  :ensure t
+  :after gptel
+  :defer t
+  :vc (:url "https://github.com/lizqwerscott/mcp.el"
+            :rev :newest
+            :branch "master")
+  :custom
+  (mcp-hub-servers
+   '(("filesystem" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-filesystem" "/home/")))))
+  :config
+  (defun gptel-mcp-register-tool ()
+    (interactive)
+    (let ((tools (mcp-hub-get-all-tool :asyncp t :categoryp t)))
+      (mapcar #'(lambda (tool)
+                  (apply #'gptel-make-tool
+                         tool))
+              tools)))
+
+  ;; TODO: seems that it should be called only after servers are running
+  (gptel-mcp-register-tool))
+
 (use-package modus-themes
   :config
   (setopt modus-themes-common-palette-overrides
