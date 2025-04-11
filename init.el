@@ -364,7 +364,9 @@ Example:
 (use-package forge
   :ensure t
   :pin melpa
-  :after magit)
+  :after magit
+  :init
+  (setq forge-add-default-bindings nil))
 
 (use-package format-all
   :defer t
