@@ -831,6 +831,8 @@ Returns the key as string or nil if unsuccessful."
   (setopt treesit-language-source-alist
           '((astro "https://github.com/virchau13/tree-sitter-astro")
             (css "https://github.com/tree-sitter/tree-sitter-css")
+            (go "https://github.com/tree-sitter/tree-sitter-go")
+            (gomod "https://github.com/camdencheek/tree-sitter-go-mod")
             (html "https://github.com/tree-sitter/tree-sitter-html")
             (javascript "https://github.com/tree-sitter/tree-sitter-javascript")
             (jsdoc "https://github.com/tree-sitter/tree-sitter-jsdoc")
@@ -840,6 +842,7 @@ Returns the key as string or nil if unsuccessful."
             (typescript . ("https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src"))
             (yaml "https://github.com/tree-sitter-grammars/tree-sitter-yaml")))
 
+  (add-to-list 'auto-mode-alist '("\\.go\\'" . go-ts-mode))
   (add-to-list 'auto-mode-alist '("\\.jqtpl\\'" . html-ts-mode))
   (add-to-list 'auto-mode-alist '("\\.js\\'" . js-ts-mode))
   (add-to-list 'auto-mode-alist '("\\.json\\'" . json-ts-mode))
