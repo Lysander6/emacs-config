@@ -330,7 +330,7 @@ Example:
 (use-package evil-commentary
   :ensure t
   :pin melpa
-  :hook (text-mode prog-mode))
+  :hook (conf-mode text-mode prog-mode))
 
 (use-package evil-goggles
   :ensure t
@@ -341,7 +341,7 @@ Example:
 (use-package evil-surround
   :ensure t
   :pin melpa
-  :hook (text-mode prog-mode))
+  :hook (conf-mode text-mode prog-mode))
 
 (use-package evil-terminal-cursor-changer
   :ensure t
