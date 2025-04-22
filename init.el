@@ -13,6 +13,7 @@
 (setq inhibit-startup-echo-area-message "lysander")
 
 (setopt
+ auto-save-default nil
  create-lockfiles nil
 
  enable-recursive-minibuffers t
