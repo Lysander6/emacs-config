@@ -662,10 +662,31 @@ Returns the key as string or nil if unsuccessful."
                               :request-params (:stream :json-false)))))
   (gptel-api-key #'my/read-github-copilot-key)
   (gptel-model 'claude-3.7-sonnet)
+  (gptel-use-tools t)
   :config
   (unless my/github-oauth-token
     (copilot-install-server)
-    (copilot-login)))
+    (copilot-login))
+
+  ;; Tools
+
+  ;; Web tools
+  (gptel-make-tool
+   :function (lambda (url)
+               (with-current-buffer (url-retrieve-synchronously url)
+                 (goto-char (point-min))
+                 (forward-paragraph)
+                 (let ((dom (libxml-parse-html-region (point) (point-max))))
+                   (run-at-time 0 nil #'kill-buffer (current-buffer))
+                   (with-temp-buffer
+                     (shr-insert-document dom)
+                     (buffer-substring-no-properties (point-min) (point-max))))))
+   :name "read_url"
+   :description "Fetch and read the contents of a URL"
+   :args (list '(:name "url"
+                       :type string
+                       :description "The URL to read"))
+   :category "web"))
 
 ;; Built-in code folding
 (use-package hideshow
