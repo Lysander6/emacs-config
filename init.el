@@ -711,7 +711,8 @@ Returns the key as string or nil if unsuccessful."
                '(:name "name"
                        :type string
                        :description "The name of the new directory to create, e.g. testdir"))
-   :category "filesystem")
+   :category "filesystem"
+   :confirm t)
 
   (gptel-make-tool
    :function (lambda (path filename content)
@@ -731,7 +732,8 @@ Returns the key as string or nil if unsuccessful."
                '(:name "content"
                        :type string
                        :description "The content to write to the file"))
-   :category "filesystem")
+   :category "filesystem"
+   :confirm t)
 
   (defun my/gptel--edit_file (file-path file-edits)
     "In FILE-PATH, apply FILE-EDITS with pattern matching and replacing."
@@ -781,7 +783,8 @@ a old-string and a new-string, new-string will replace the old-string at the spe
                                       :new_string
                                       (:type string :description "The new-string to replace old-string.")))
                        :description "The list of edits to apply on the file"))
-   :category "filesystem")
+   :category "filesystem"
+   :confirm t)
 
   (gptel-make-tool
    :function (lambda (script_program script_file script_args)
@@ -802,7 +805,8 @@ a old-string and a new-string, new-string will replace the old-string at the spe
           '(:name "script_args"
                   :type string
                   :description "Args for script to run."))
-   :category "filesystem")
+   :category "filesystem"
+   :confirm t)
 
   (gptel-make-tool
    :function (lambda (command)
@@ -814,7 +818,8 @@ a old-string and a new-string, new-string will replace the old-string at the spe
           '(:name "command"
                   :type "string"
                   :description "Command to run."))
-   :category "command")
+   :category "command"
+   :confirm t)
 
   (defun my/run_async_command (callback command)
     "Run COMMAND asynchronously and pass output to CALLBACK."
@@ -846,7 +851,8 @@ a old-string and a new-string, new-string will replace the old-string at the spe
                   :description "Command to run."))
    :category "command"
    :async t
-   :include t)
+   :include t
+   :confirm t)
 
   ;; Emacs Tools
 
@@ -1068,7 +1074,8 @@ by CONNECTION-NAME, evaluate the query, and return the result as a string."
                '(:name "text"
                        :type string
                        :description "The text to append to the buffer."))
-   :category "emacs")
+   :category "emacs"
+   :confirm t)
 
   (defun my/codel-edit-buffer (buffer-name old-string new-string)
     "In BUFFER-NAME, replace OLD-STRING with NEW-STRING."
@@ -1104,7 +1111,8 @@ by CONNECTION-NAME, evaluate the query, and return the result as a string."
                   :type string
                   :description "Text to replace old_string with"
                   :required t))
-   :category "edit")
+   :category "edit"
+   :confirm t)
 
   (defun my/codel-replace-buffer (buffer-name content)
     "Completely replace contents of BUFFER-NAME with CONTENT."
@@ -1125,7 +1133,8 @@ by CONNECTION-NAME, evaluate the query, and return the result as a string."
                   :type string
                   :description "Content to write to the buffer"
                   :required t))
-   :category "edit"))
+   :category "edit"
+   :confirm t))
 
 ;; Built-in code folding
 (use-package hideshow
