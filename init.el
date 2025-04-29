@@ -167,66 +167,6 @@ User selects namespace from a fixed list, then chooses a repository to clone."
          (consult-gh-repo-action #'consult-gh--repo-clone-action))
     (consult-gh-search-repos query-string)))
 
-(defun my/read-json-key (file-path key-path)
-  "Read nested value from JSON file at FILE-PATH using KEY-PATH.
-FILE-PATH should be a string representing path to JSON file.
-KEY-PATH can be either a single key or a list of keys for nested objects.
-
-Example:
-  (my/read-json-key \"~/.config/config.json\" '(\"user\" \"settings\" \"theme\"))
-  (my/read-json-key \"~/.config/config.json\" \"simple_key\")"
-  (let ((expanded-path (expand-file-name file-path)))
-    (condition-case err
-        (if (not (file-exists-p expanded-path))
-            (error "JSON file not found at %s" expanded-path)
-          (let ((json-object-type 'hash-table)
-                (json-array-type 'list)
-                (json-key-type 'string))
-            (let* ((json-data (json-read-file expanded-path))
-                   (keys (cond
-                          ((stringp key-path) (list key-path))
-                          ((listp key-path) key-path)
-                          (t (error "KEY-PATH must be a string or list of strings"))))
-                   (value (seq-reduce
-                          (lambda (obj key)
-                            (cond
-                              ((null obj) nil)
-                              ((hash-table-p obj) (gethash key obj))
-                              (t (error "Cannot traverse through non-object value at %s"
-                                      (seq-take keys (seq-position keys key))))))
-                          keys
-                          json-data)))
-              (or value
-                  (error "Path %s not found in JSON file"
-                         (if (listp key-path)
-                             (string-join key-path " -> ")
-                           key-path))))))
-      (error (error "Error reading JSON file: %s" err)))))
-
-
-(defconst my/github-oauth-token-file-path "~/.config/github-copilot/apps.json")
-
-(defun my/read-github-oauth-token ()
-  (let ((oauth-token-key (car (hash-table-keys (my/read-json-key my/github-oauth-token-file-path '())))))
-    (my/read-json-key my/github-oauth-token-file-path `(,oauth-token-key "oauth_token"))))
-
-(defvar my/github-oauth-token
-  (with-demoted-errors "Error reading GitHub OAuth token: %S"
-    (my/read-github-oauth-token))
-  "GitHub OAuth token.")
-
-(defun my/update-github-oauth-token ()
-  "Update the GitHub OAuth token value after login."
-  (setq my/github-oauth-token (my/read-github-oauth-token)))
-
-(use-package copilot
-  :ensure t
-  :pin melpa
-  :defer t
-  :commands (copilot-install-server copilot-login)
-  :config
-  (advice-add 'copilot-login :after #'my/update-github-oauth-token))
-
 (use-package corfu
   :ensure t
   :pin melpa
@@ -501,172 +441,13 @@ Example:
 ;;         :foreground
 ;;         ,(face-attribute 'modus-themes-fg-red-faint :foreground))))))
 
-(defconst my/github-copilot-token-file-path "~/.config/my-github-copilot/token.json")
-
-(defvar my/github-copilot-token
-  (with-demoted-errors "Error reading GitHub Copilot token: %S"
-    (my/read-json-key my/github-copilot-token-file-path "token"))
-  "GitHub Copilot token.")
-
-(defvar my/github-copilot-token-expires-at
-  (with-demoted-errors "Error reading GitHub Copilot token expiration timestamp: %S"
-    (my/read-json-key my/github-copilot-token-file-path "expires_at"))
-  "GitHub Copilot token expiration timestamp.")
-
-(defun my/expired-p (timestamp)
-  "Check if TIMESTAMP (Unix timestamp) is in the past."
-  (> (time-convert nil 'integer) timestamp))
-
-(defun my/ensure-directory-exists (file-path)
-  (let ((directory (file-name-directory (expand-file-name file-path))))
-    (unless (file-exists-p directory)
-      (make-directory directory t))))
-
-(defun my/fetch-github-copilot-token (auth-token)
-  "Fetch GitHub Copilot token using AUTH-TOKEN for authentication.
-Returns t if successful, nil otherwise."
-  (let ((output-file (expand-file-name my/github-copilot-token-file-path)))
-    (my/ensure-directory-exists my/github-copilot-token-file-path)
-
-    (condition-case err
-        (let ((exit-code
-               (call-process "curl" nil nil nil
-                            "-XGET"
-                            "-sS" ;; silent but show errors
-                            "-f"  ;; fail on HTTP errors
-                            "-H" (concat "authorization: Bearer " auth-token)
-                            "-H" "content-type: application/json"
-                            "-o" output-file
-                            "https://api.github.com/copilot_internal/v2/token")))
-          (if (= exit-code 0)
-              t
-            (message "Curl failed with exit code %d" exit-code)
-            nil))
-      (error
-       (message "Error running curl: %s" err)
-       nil))))
-
-(defun my/read-github-copilot-key ()
-  "Get GitHub Copilot key, refreshing if expired.
-Returns the key as string or nil if unsuccessful."
-  ;; Return cached token if it's valid
-  (if (and my/github-copilot-token
-           my/github-copilot-token-expires-at
-           (not (my/expired-p my/github-copilot-token-expires-at)))
-      my/github-copilot-token
-
-    ;; Otherwise, fetch new token
-    (let ((token-file my/github-copilot-token-file-path))
-      (unless my/github-oauth-token
-        (error "GitHub Copilot auth token not set"))
-
-      (message "Fetching new GitHub Copilot token...")
-      (if (my/fetch-github-copilot-token my/github-oauth-token)
-          (progn
-            (setq my/github-copilot-token-expires-at
-                  (with-demoted-errors "Error reading expires_at: %S"
-                    (my/read-json-key token-file "expires_at"))
-                  my/github-copilot-token
-                  (with-demoted-errors "Error reading token: %S"
-                    (my/read-json-key token-file "token")))
-            (if (and my/github-copilot-token my/github-copilot-token-expires-at)
-                my/github-copilot-token
-              (progn
-                (message "Failed to read new token or expiration timestamp")
-                nil)))
-        (progn
-          (message "Failed to fetch new token")
-          nil)))))
-
 (use-package gptel
   :ensure t
   :pin melpa
   :defer t
   :custom
-  ;; Consult [CopilotChat.nvim README](https://github.com/CopilotC-Nvim/CopilotChat.nvim/blob/dbce8a231d1ac72c68ce00b86b415c9304417102/README.md?plain=1#L244-L248)
-  ;; for the model names and [gptel.el source](https://github.com/karthink/gptel/blob/4ab198a904f1706a8daede1145386db4dc960aa1/gptel-anthropic.el#L390)
-  ;; for their properties.
-  (gptel-backend (gptel-make-openai "Github Copilot"
-                   :header (lambda () (when-let (key (my/read-github-copilot-key))
-                                        `(("Authorization" . ,(concat "Bearer " key))
-                                          ("Content-Type" . "application/json")
-                                          ("Copilot-Integration-Id" . "vscode-chat")
-                                          ("Editor-Version" . "emacs"))))
-                   :host "api.business.githubcopilot.com"
-                   :endpoint "/chat/completions"
-                   :stream t
-                   :key #'my/read-github-copilot-key
-                   :models '((claude-3.5-sonnet
-                              :description "Highest level of intelligence and capability"
-                              :capabilities (media tool-use cache)
-                              :mime-types ("image/jpeg" "image/png" "image/gif" "image/webp" "application/pdf")
-                              :context-window 200
-                              :input-cost 3
-                              :output-cost 15
-                              :cutoff-date "2024-04")
-                             (claude-3.7-sonnet
-                              :description "Hybrid model capable of standard thinking and extended thinking modes"
-                              :capabilities (media tool-use cache)
-                              :mime-types ("image/jpeg" "image/png" "image/gif" "image/webp" "application/pdf")
-                              :context-window 200
-                              :input-cost 3
-                              :output-cost 15
-                              :cutoff-date "2025-02")
-                             (claude-3.7-sonnet-thought
-                              :description "Hybrid model capable of standard thinking and extended thinking modes"
-                              :capabilities (media cache)
-                              :mime-types ("image/jpeg" "image/png" "image/gif" "image/webp" "application/pdf")
-                              :context-window 200
-                              :input-cost 3
-                              :output-cost 15
-                              :cutoff-date "2025-02")
-                             (gemini-2.0-flash-001
-                              :description "Next generation features, superior speed, native tool use"
-                              :capabilities (tool-use json media)
-                              :mime-types ("image/png" "image/jpeg" "image/webp" "image/heic" "image/heif"
-                                           "application/pdf" "text/plain" "text/csv" "text/html")
-                              :context-window 1000
-                              :cutoff-date "2024-12")
-                             (gpt-4o
-                              :description "Advanced model for complex tasks; cheaper & faster than GPT-Turbo"
-                              :capabilities (media tool-use json url)
-                              :mime-types ("image/jpeg" "image/png" "image/gif" "image/webp")
-                              :context-window 128
-                              :input-cost 2.50
-                              :output-cost 10
-                              :cutoff-date "2023-10")
-                             (gpt-4o-mini
-                              :description "Cheap model for fast tasks; cheaper & more capable than GPT-3.5 Turbo"
-                              :capabilities (media tool-use json url)
-                              :mime-types ("image/jpeg" "image/png" "image/gif" "image/webp")
-                              :context-window 128
-                              :input-cost 0.15
-                              :output-cost 0.60
-                              :cutoff-date "2023-10")
-                             (o1
-                              :description "Reasoning model designed to solve hard problems across domains"
-                              :capabilities (nosystem media reasoning)
-                              :mime-types ("image/jpeg" "image/png" "image/gif" "image/webp")
-                              :context-window 200
-                              :input-cost 15
-                              :output-cost 60
-                              :cutoff-date "2023-10"
-                              :request-params (:stream :json-false))
-                             (o3-mini
-                              :description "High intelligence at the same cost and latency targets of o1-mini"
-                              :context-window 200
-                              :input-cost 3
-                              :output-cost 12
-                              :cutoff-date "2023-10"
-                              :capabilities (nosystem reasoning)
-                              :request-params (:stream :json-false)))))
-  (gptel-api-key #'my/read-github-copilot-key)
-  (gptel-model 'claude-3.7-sonnet)
   (gptel-use-tools t)
   :config
-  (unless my/github-oauth-token
-    (copilot-install-server)
-    (copilot-login))
 
   ;; Tools
 
@@ -1207,6 +988,14 @@ by CONNECTION-NAME, evaluate the query, and return the result as a string."
                        :type integer
                        :description "Optional maximum number of results per file"))
    :category "code-search"))
+
+(use-package gptel-gh
+  :after gptel
+  :defer t
+  :custom
+  (gptel-backend (gptel-make-gh-copilot "Github Copilot"
+                   :host "api.business.githubcopilot.com"))
+  (gptel-model 'claude-3.7-sonnet))
 
 ;; Built-in code folding
 (use-package hideshow
