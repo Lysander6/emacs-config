@@ -809,6 +809,45 @@ a old-string and a new-string, new-string will replace the old-string at the spe
    :confirm t)
 
   (gptel-make-tool
+   :function (lambda (pattern directory file_type max_depth max_results)
+               (let ((cmd (format "fd %s %s %s %s %s"
+                                  (shell-quote-argument (or pattern ""))
+                                  (if (and file_type (not (string-empty-p file_type)))
+                                      (format "--type %s" (shell-quote-argument file_type))
+                                    "")
+                                  (if max_depth
+                                      (format "--max-depth %d" max_depth)
+                                    "")
+                                  (if max_results
+                                      (format "--max-results %d" max_results)
+                                    "")
+                                  (shell-quote-argument (expand-file-name directory))))
+                     (default-directory (expand-file-name directory)))
+                 (with-temp-message (format "Finding files matching: %s" (or pattern "any file"))
+                   (let ((output (shell-command-to-string cmd)))
+                     (if (string-empty-p output)
+                         "No files found matching the criteria."
+                       output)))))
+   :name "find_files"
+   :description "Find files matching a pattern using fd (modern find replacement)"
+   :args (list '(:name "pattern"
+                       :type string
+                       :description "Search pattern for file names (leave empty to find all files)")
+               '(:name "directory"
+                       :type string
+                       :description "Directory to search in. Supports relative paths and ~.")
+               '(:name "file_type"
+                       :type string
+                       :description "Optional file type filter: 'f' for files, 'd' for directories, 'l' for symlinks")
+               '(:name "max_depth"
+                       :type integer
+                       :description "Optional maximum directory depth to search")
+               '(:name "max_results"
+                       :type integer
+                       :description "Optional maximum number of results to return"))
+   :category "filesystem")
+
+  (gptel-make-tool
    :function (lambda (command)
                (with-temp-message (format "Running command: %s" command)
                  (shell-command-to-string command)))
@@ -1134,7 +1173,40 @@ by CONNECTION-NAME, evaluate the query, and return the result as a string."
                   :description "Content to write to the buffer"
                   :required t))
    :category "edit"
-   :confirm t))
+   :confirm t)
+
+  ;; Code Search Tools
+
+  (gptel-make-tool
+   :function (lambda (pattern directory file_pattern max_results)
+               (let ((cmd (format "rg --line-number --no-heading --with-filename %s \"%s\" %s %s"
+                                  (if max_results (format "--max-count=%d" max_results) "")
+                                  (shell-quote-argument pattern)
+                                  (if (and file_pattern (not (string-empty-p file_pattern)))
+                                      (format "-g \"%s\"" (shell-quote-argument file_pattern))
+                                    "")
+                                  (shell-quote-argument (expand-file-name directory))))
+                     (default-directory (expand-file-name directory)))
+                 (with-temp-message (format "Searching for: %s" pattern)
+                   (let ((output (shell-command-to-string cmd)))
+                     (if (string-empty-p output)
+                         "No matches found."
+                       output)))))
+   :name "search_code"
+   :description "Search for code or text patterns in files using ripgrep (rg)"
+   :args (list '(:name "pattern"
+                       :type string
+                       :description "Search pattern to find in code files")
+               '(:name "directory"
+                       :type string
+                       :description "Directory to search in. Supports relative paths and ~.")
+               '(:name "file_pattern"
+                       :type string
+                       :description "Optional glob pattern to filter files to search (e.g. '*.py' for Python files)")
+               '(:name "max_results"
+                       :type integer
+                       :description "Optional maximum number of results per file"))
+   :category "code-search"))
 
 ;; Built-in code folding
 (use-package hideshow
