@@ -18,6 +18,8 @@
 
  enable-recursive-minibuffers t
 
+ indent-tabs-mode nil
+
  inhibit-startup-screen t
  initial-scratch-message ""
 
