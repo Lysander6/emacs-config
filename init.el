@@ -16,6 +16,8 @@
  auto-save-default nil
  create-lockfiles nil
 
+ browse-url-browser-function #'eww-browse-url
+
  enable-recursive-minibuffers t
 
  indent-tabs-mode nil
