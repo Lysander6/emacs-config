@@ -207,6 +207,15 @@ User selects namespace from a fixed list, then chooses a repository to clone."
   ;; (display-line-numbers-type 'relative)
   (display-line-numbers-width 3))
 
+(use-package dumb-jump
+  :ensure t
+  :pin melpa
+  :defer t
+  :custom
+  (dumb-jump-force-searcher 'rg)
+  :init
+  (add-hook 'xref-backend-functions #'dumb-jump-xref-activate))
+
 (use-package editorconfig
   :hook (text-mode prog-mode))
 
