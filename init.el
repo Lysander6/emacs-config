@@ -1011,6 +1011,15 @@ by CONNECTION-NAME, evaluate the query, and return the result as a string."
   :custom
   (hl-line-sticky-flag nil))
 
+(use-package jira
+  :ensure t
+  :pin melpa
+  :defer t
+  :custom
+  (jira-base-url "https://jira.ringieraxelspringer.pl")
+  (jira-token-is-personal-access-token t)
+  (jira-api-version 2))
+
 (use-package magit
   :ensure t
   :pin melpa
