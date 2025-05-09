@@ -87,10 +87,10 @@
   (let ((display-table (or buffer-display-table standard-display-table (make-display-table))))
     (set-display-table-slot display-table 'vertical-border ?█)
     ;; (set-window-display-table (selected-window) display-table)
+    (set-face-attribute 'vertical-border nil :foreground (face-attribute 'mode-line-inactive :background))
     ))
 
 (unless (display-graphic-p)
-  (set-face-attribute 'vertical-border nil :foreground (face-attribute 'mode-line-inactive :background))
   (add-hook 'window-configuration-change-hook 'change-window-divider))
 
 (use-package package
