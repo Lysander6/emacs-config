@@ -214,7 +214,9 @@ User selects namespace from a fixed list, then chooses a repository to clone."
   :custom
   (dumb-jump-force-searcher 'rg)
   :init
-  (add-hook 'xref-backend-functions #'dumb-jump-xref-activate))
+  (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
+  :config
+  (add-to-list 'dumb-jump-language-file-exts '(:language "javascript" :ext "jqtpl" :agtype nil :rgtype nil)))
 
 (use-package editorconfig
   :hook (text-mode prog-mode))
