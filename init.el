@@ -1020,6 +1020,13 @@ by CONNECTION-NAME, evaluate the query, and return the result as a string."
   :custom
   (hl-line-sticky-flag nil))
 
+(use-package html-ts-mode
+  :config
+  ;; Mark dot character as a punctuation character (symbol separator)
+  ;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Syntax-Class-Table.html
+  ;; https://emacs.stackexchange.com/a/19564
+  (modify-syntax-entry ?. "." html-ts-mode-syntax-table))
+
 (use-package jira
   :ensure t
   :pin melpa
