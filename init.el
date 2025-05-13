@@ -213,6 +213,7 @@ User selects namespace from a fixed list, then chooses a repository to clone."
   :defer t
   :custom
   (dumb-jump-force-searcher 'rg)
+  ;; (dumb-jump-rg-search-args "--pcre2 -g '!*.{spec,test}.js'")
   :init
   (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
   :config
