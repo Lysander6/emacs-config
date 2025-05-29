@@ -1028,7 +1028,7 @@ by CONNECTION-NAME, evaluate the query, and return the result as a string."
   :custom
   (gptel-backend (gptel-make-gh-copilot "Github Copilot"
                    :host "api.business.githubcopilot.com"))
-  (gptel-model 'claude-3.7-sonnet))
+  (gptel-model 'claude-sonnet-4))
 
 ;; Built-in code folding
 (use-package hideshow
