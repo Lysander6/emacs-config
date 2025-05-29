@@ -129,7 +129,10 @@
   :pin melpa
   :defer t
   :custom
-  (consult-gh-default-clone-directory "~/workspace/")
+  (consult-gh-default-clone-directory
+   (pcase (getenv "USER")
+     ("lysander" "~/projects/")
+     (_ "~/workspace/")))
   (consult-gh-favorite-orgs-list '("Ringier-Axel-Springer-PL"))
   ;; (consult-gh-repo-maxnum 1000) ;; append something like ` -- -L 1000' to the search query, instead of changing the default value
   )
