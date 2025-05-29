@@ -219,6 +219,12 @@ User selects namespace from a fixed list, then chooses a repository to clone."
   :config
   (add-to-list 'dumb-jump-language-file-exts '(:language "javascript" :ext "jqtpl" :agtype nil :rgtype nil)))
 
+(use-package ediff
+  :defer t
+  :custom
+  (ediff-split-window-function 'split-window-horizontally)
+  (ediff-window-setup-function 'ediff-setup-windows-plain))
+
 (use-package editorconfig
   :hook (text-mode prog-mode))
 
@@ -572,8 +578,15 @@ User selects namespace from a fixed list, then chooses a repository to clone."
               ;; Return result to gptel
               (if edit-success
                   (progn
-                    ;; Show diffs
-                    (ediff-buffers (find-file-noselect file-name) edit-buffer)
+                    ;; Show diffs with cleanup hook
+                    (let ((saved-window-config (current-window-configuration)))
+                      (letrec ((cleanup-fn (lambda ()
+                                             ;; Restore the original window setup
+                                             (set-window-configuration saved-window-config)
+                                             ;; (kill-buffer edit-buffer)
+                                             (remove-hook 'ediff-quit-hook cleanup-fn))))
+                        (add-hook 'ediff-quit-hook cleanup-fn)
+                        (ediff-buffers (find-file-noselect file-name) edit-buffer)))
                     (format "Successfully edited %s" file-name))
                 (format "Failed to edit %s" file-name)))))
       (format "Failed to edit %s" file-path)))
