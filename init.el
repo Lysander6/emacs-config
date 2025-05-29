@@ -535,31 +535,39 @@ User selects namespace from a fixed list, then chooses a repository to clone."
   (defun my/gptel--edit_file (file-path file-edits)
     "In FILE-PATH, apply FILE-EDITS with pattern matching and replacing."
     (if (and file-path (not (string= file-path "")) file-edits)
-        (with-current-buffer (get-buffer-create "*edit-file*")
-          (insert-file-contents (expand-file-name file-path))
-          (let ((inhibit-read-only t)
-                (case-fold-search nil)
-                (file-name (expand-file-name file-path))
-                (edit-success nil))
-            ;; apply changes
-            (dolist (file-edit (seq-into file-edits 'list))
-              (when-let* ((line-number (plist-get file-edit :line_number))
-                          (old-string (plist-get file-edit :old_string))
-                          (new-string (plist-get file-edit :new_string))
-                          (is-valid-old-string (not (string= old-string ""))))
-                (goto-char (point-min))
-                (forward-line (1- line-number))
-                (when (search-forward old-string nil t)
-                  (replace-match new-string t t)
-                  (setq edit-success t))))
-            ;; return result to gptel
-            (if edit-success
-                (progn
-                  ;; show diffs
-                  (ediff-buffers (find-file-noselect file-name) (current-buffer))
-                  (format "Successfully edited %s" file-name))
-              (format "Failed to edited %s" file-name))))
-      (format "Failed to edited %s" file-path)))
+        (let* ((file-name (expand-file-name file-path))
+               (base-buffer-name (format "*edit-file %s*" (file-name-nondirectory file-name)))
+               (buffer-name (generate-new-buffer-name base-buffer-name))
+               (edit-buffer (get-buffer-create buffer-name)))
+          (with-current-buffer edit-buffer
+            (insert-file-contents file-name)
+            (let ((inhibit-read-only t)
+                  (case-fold-search nil)
+                  (edit-success nil)
+                  ;; Sort edits by line number in descending order (bottom to top)
+                  (sorted-edits (sort (seq-into file-edits 'list)
+                                      (lambda (a b)
+                                        (> (plist-get a :line_number)
+                                           (plist-get b :line_number))))))
+              ;; Apply changes from bottom to top
+              (dolist (file-edit sorted-edits)
+                (when-let* ((line-number (plist-get file-edit :line_number))
+                            (old-string (plist-get file-edit :old_string))
+                            (new-string (plist-get file-edit :new_string))
+                            (is-valid-old-string (not (string= old-string ""))))
+                  (goto-char (point-min))
+                  (forward-line (1- line-number))
+                  (when (search-forward old-string nil t)
+                    (replace-match new-string t t)
+                    (setq edit-success t))))
+              ;; Return result to gptel
+              (if edit-success
+                  (progn
+                    ;; Show diffs
+                    (ediff-buffers (find-file-noselect file-name) edit-buffer)
+                    (format "Successfully edited %s" file-name))
+                (format "Failed to edit %s" file-name)))))
+      (format "Failed to edit %s" file-path)))
 
   (gptel-make-tool
    :function #'my/gptel--edit_file
