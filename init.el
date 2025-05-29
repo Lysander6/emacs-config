@@ -582,14 +582,19 @@ User selects namespace from a fixed list, then chooses a repository to clone."
               (if edit-success
                   (progn
                     ;; Show diffs with cleanup hook
-                    (let ((saved-window-config (current-window-configuration)))
+                    (let ((saved-window-config (current-window-configuration))
+                       (original-buffer (find-file-noselect file-name)))
                       (letrec ((cleanup-fn (lambda ()
+                                             ;; Save the original buffer first
+                                             (when (buffer-live-p original-buffer)
+                                               (with-current-buffer original-buffer
+                                                 (save-buffer)))
                                              ;; Restore the original window setup
                                              (set-window-configuration saved-window-config)
                                              ;; (kill-buffer edit-buffer)
                                              (remove-hook 'ediff-quit-hook cleanup-fn))))
                         (add-hook 'ediff-quit-hook cleanup-fn)
-                        (ediff-buffers (find-file-noselect file-name) edit-buffer)))
+                        (ediff-buffers original-buffer edit-buffer)))
                     (format "Successfully edited %s" file-name))
                 (format "Failed to edit %s" file-name)))))
       (format "Failed to edit %s" file-path)))
