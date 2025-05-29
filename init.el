@@ -464,6 +464,15 @@ User selects namespace from a fixed list, then chooses a repository to clone."
   :custom
   (gptel-use-tools t)
   :config
+  (define-key gptel-mode-map (kbd "S-<return>") nil)
+  (define-key gptel-mode-map (kbd "<visual-state> S-<return>") nil)
+  (define-key gptel-mode-map (kbd "<normal-state> S-<return>") nil)
+  (define-key gptel-mode-map (kbd "S-RET") nil)
+  (define-key gptel-mode-map (kbd "<visual-state> S-RET") nil)
+  (define-key gptel-mode-map (kbd "<normal-state> S-RET") nil)
+
+  (define-key gptel-mode-map (kbd "M-<return>") #'gptel-menu)
+  (define-key gptel-mode-map (kbd "M-RET") #'gptel-menu)
 
   ;; Tools
 
