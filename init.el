@@ -485,6 +485,101 @@ User selects namespace from a fixed list, then chooses a repository to clone."
 
   ;; Tools
 
+  ;; Human
+
+  (defun my/gptel-ask-human (callback question)
+    "Ask the human a QUESTION and return their answer via CALLBACK.
+Opens a temporary buffer for the user to input their response.
+Behaves like git commit: saving with content submits, saving empty cancels."
+    (let* ((buffer-name (format "*Question from AI: %s*"
+                                (format-time-string "%H:%M:%S")))
+           (question-buffer (get-buffer-create buffer-name))
+           (original-window-config (current-window-configuration))
+           (callback-called nil)) ; Track if callback was already called
+
+      (with-current-buffer question-buffer
+        ;; Set up the buffer
+        (erase-buffer)
+        (insert (format "<!-- AI Question: %s -->\n" question))
+        (insert "<!-- Please type your answer below and use C-c C-c to submit or C-c C-k to cancel -->\n")
+        (insert "<!-- Saving with empty content will cancel the question -->\n\n")
+
+        ;; Use markdown-ts-mode if available, fall back to markdown-mode or text-mode
+        (cond
+         ((fboundp 'markdown-ts-mode) (markdown-ts-mode))
+         ((fboundp 'markdown-mode) (markdown-mode))
+         (t (text-mode)))
+
+        ;; Make it read-write
+        (setq buffer-read-only nil)
+
+        ;; Function to extract and process answer
+        (defun my/process-answer ()
+          (unless callback-called ; Prevent multiple calls
+            (setq callback-called t)
+            (let* ((content (buffer-substring-no-properties (point-min) (point-max)))
+                   ;; Remove comment lines and get actual content
+                   (lines (split-string content "\n"))
+                   (content-lines (seq-filter
+                                   (lambda (line)
+                                     (not (string-match-p "^\\s-*<!--" line)))
+                                   lines))
+                   (answer (string-join content-lines "\n")))
+              (setq answer (string-trim answer))
+              (kill-buffer (current-buffer))
+              (set-window-configuration original-window-config)
+              (if (string-empty-p answer)
+                  (progn
+                    (message "Empty response - cancelling question")
+                    (funcall callback "User cancelled the question (empty response)."))
+                (progn
+                  (message "Answer submitted to AI")
+                  (funcall callback answer))))))
+
+        ;; Function to cancel
+        (defun my/cancel-question ()
+          (unless callback-called
+            (setq callback-called t)
+            (kill-buffer (current-buffer))
+            (set-window-configuration original-window-config)
+            (funcall callback "User cancelled the question.")))
+
+        ;; Set up keybindings
+        (local-set-key (kbd "C-c C-c")
+                       (lambda ()
+                         (interactive)
+                         (my/process-answer)))
+
+        (local-set-key (kbd "C-c C-k")
+                       (lambda ()
+                         (interactive)
+                         (when (y-or-n-p "Cancel question? ")
+                           (my/cancel-question))))
+
+        ;; Handle window/buffer deletion gracefully
+        (add-hook 'kill-buffer-hook
+                  (lambda ()
+                    (my/cancel-question))
+                  nil t)
+
+        ;; Position cursor after the comments
+        (goto-char (point-max)))
+
+      ;; Display the buffer
+      (pop-to-buffer question-buffer)
+      (message "Answer the question and use C-c C-c to submit or C-c C-k to cancel.")))
+
+  (gptel-make-tool
+   :name "ask_human"
+   :function #'my/gptel-ask-human
+   :description "Ask the human user a question and wait for their response."
+   :args (list '(:name "question"
+                       :type string
+                       :description "The question to ask the human user"))
+   :category "human"
+   :async t
+   :include t)
+
   ;; Filesystem Tools
 
   (gptel-make-tool
