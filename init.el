@@ -155,6 +155,7 @@
   '("business"
     "fakt"
     "omp"
+    "ucs2"
     "widgets-platform")
   "List of GitHub repository namespaces to select from.")
 
@@ -168,7 +169,7 @@
 User selects namespace from a fixed list, then chooses a repository to clone."
   (interactive)
   (let* ((namespace (completing-read "Select namespace: " my/github-namespaces nil t))
-         (query-string (format "props.namespace:%s -- --owner %s --limit 100#"
+         (query-string (format "props.namespace:%s -- --owner %s --limit 300#"
                                namespace
                                my/github-organization))
          (consult-gh-repo-action #'consult-gh--repo-clone-action))
