@@ -834,26 +834,37 @@ newlines."
    :category "filesystem"
    :confirm t)
 
+  (defun my/run_async_command (callback command)
+    "Run COMMAND asynchronously and pass output to CALLBACK."
+    (condition-case error
+        (let ((buffer (generate-new-buffer " *async output*")))
+          (with-temp-message (format "Running async command: %s" command)
+            (async-shell-command command buffer nil))
+          (let ((proc (get-buffer-process buffer)))
+            (when proc
+              (set-process-sentinel
+               proc
+               (lambda (process _event)
+                 (unless (process-live-p process)
+                   (with-current-buffer (process-buffer process)
+                     (let ((output (buffer-substring-no-properties (point-min) (point-max))))
+                       (kill-buffer (current-buffer))
+                       (funcall callback output)))))))))
+      (t
+       ;; Handle any kind of error
+       (funcall callback (format "An error occurred: %s" error)))))
+
   (gptel-make-tool
-   :function (lambda (script_program script_file script_args)
-               (with-temp-message "Executing command ..."
-                 (shell-command-to-string
-                  (concat script_program " "
-                          (expand-file-name script_file) " "
-                          script_args))))
-   :name "run_script"
-   :description "Run script"
+   :function #'my/run_async_command
+   :name "run_command"
+   :description "Run an command."
    :args (list
-          '(:name "script_program"
-                  :type string
-                  :description "Program to run the the script.")
-          '(:name "script_file"
-                  :type string
-                  :description "Path to the script to run. Supports relative paths and ~.")
-          '(:name "script_args"
-                  :type string
-                  :description "Args for script to run."))
+          '(:name "command"
+                  :type "string"
+                  :description "Command to run."))
    :category "filesystem"
+   :async t
+   :include t
    :confirm t)
 
   (gptel-make-tool
@@ -894,52 +905,6 @@ newlines."
                        :type integer
                        :description "Optional maximum number of results to return"))
    :category "filesystem")
-
-  (gptel-make-tool
-   :function (lambda (command)
-               (with-temp-message (format "Running command: %s" command)
-                 (shell-command-to-string command)))
-   :name "run_command"
-   :description "Run a command."
-   :args (list
-          '(:name "command"
-                  :type "string"
-                  :description "Command to run."))
-   :category "command"
-   :confirm t)
-
-  (defun my/run_async_command (callback command)
-    "Run COMMAND asynchronously and pass output to CALLBACK."
-    (condition-case error
-        (let ((buffer (generate-new-buffer " *async output*")))
-          (with-temp-message (format "Running async command: %s" command)
-            (async-shell-command command buffer nil))
-          (let ((proc (get-buffer-process buffer)))
-            (when proc
-              (set-process-sentinel
-               proc
-               (lambda (process _event)
-                 (unless (process-live-p process)
-                   (with-current-buffer (process-buffer process)
-                     (let ((output (buffer-substring-no-properties (point-min) (point-max))))
-                       (kill-buffer (current-buffer))
-                       (funcall callback output)))))))))
-      (t
-       ;; Handle any kind of error
-       (funcall callback (format "An error occurred: %s" error)))))
-
-  (gptel-make-tool
-   :function #'my/run_async_command
-   :name "run_async_command"
-   :description "Run an async command."
-   :args (list
-          '(:name "command"
-                  :type "string"
-                  :description "Command to run."))
-   :category "command"
-   :async t
-   :include t
-   :confirm t)
 
   ;; Emacs Tools
 
