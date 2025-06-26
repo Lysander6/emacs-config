@@ -783,8 +783,10 @@ Behaves like git commit: saving with content submits, saving empty cancels."
   (gptel-make-tool
    :function #'my/gptel--edit_file
    :name "edit_file"
-   :description "Edit file with a list of edits, each edit contains a line-number,
-a old-string and a new-string, new-string will replace the old-string at the specified line."
+   :description "Edit file by finding and replacing strings. Supports both single-line
+and multi-line string replacements. Searches forward from the specified
+line number. The old_string must match exactly including whitespace and
+newlines."
    :args (list '(:name "file-path"
                        :type string
                        :description "The full path of the file to edit")
@@ -793,12 +795,12 @@ a old-string and a new-string, new-string will replace the old-string at the spe
                        :items (:type object
                                      :properties
                                      (:line_number
-                                      (:type integer :description "The line number of the file where edit starts.")
+                                      (:type integer :description "Line number where search begins (1-based)")
                                       :old_string
-                                      (:type string :description "The old-string to be replaced.")
+                                      (:type string :description "Exact string to find and replace")
                                       :new_string
-                                      (:type string :description "The new-string to replace old-string.")))
-                       :description "The list of edits to apply on the file"))
+                                      (:type string :description "Replacement string")))
+                       :description "List of edits to apply"))
    :category "filesystem"
    :confirm t)
 
