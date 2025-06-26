@@ -706,33 +706,32 @@ Behaves like git commit: saving with content submits, saving empty cancels."
                      ;; Validation checks for each edit
                      ((not (and line-number old-string new-string))
                       (setq edit-result "Missing required fields (line_number, old_string, new_string)")
-                      (cl-incf failed-edits))
+                      (setq failed-edits (1+ failed-edits)))
 
                      ((or (<= line-number 0) (> line-number total-lines))
                       (setq edit-result (format "Line number %d is out of range (1-%d)" line-number total-lines))
-                      (cl-incf failed-edits))
+                      (setq failed-edits (1+ failed-edits)))
 
                      ((string= old-string "")
                       (setq edit-result "old_string cannot be empty")
-                      (cl-incf failed-edits))
+                      (setq failed-edits (1+ failed-edits)))
 
                      (t
-                      ;; Attempt the edit
+                      ;; Attempt the edit - search from line start to end of buffer
                       (save-excursion
                         (goto-char (point-min))
                         (forward-line (1- line-number))
-                        (let ((line-start (point))
-                              (line-end (line-end-position))
-                              (line-content (buffer-substring-no-properties (point) (line-end-position))))
-
-                          (if (search-forward old-string line-end t)
+                        (let ((search-start (point)))
+                          (if (search-forward old-string nil t)
                               (progn
                                 (replace-match new-string t t)
                                 (setq edit-result "Success")
-                                (cl-incf successful-edits))
-                            (setq edit-result (format "String '%s' not found on line %d. Line content: '%s'"
-                                                      old-string line-number line-content))
-                            (cl-incf failed-edits))))))
+                                (setq successful-edits (1+ successful-edits)))
+                            (let ((line-content (buffer-substring-no-properties
+                                                 search-start (line-end-position))))
+                              (setq edit-result (format "String not found starting at line %d. Line content: '%s'"
+                                                        line-number line-content))
+                              (setq failed-edits (1+ failed-edits))))))))
 
                     ;; Store result for this edit
                     (push (list :line_number line-number
