@@ -658,6 +658,38 @@ Behaves like git commit: saving with content submits, saving empty cancels."
    :category "filesystem"
    :confirm t)
 
+  (defun my/trim-trailing-whitespace-multiline (string)
+    "Remove trailing whitespace from each line in a multi-line string."
+    (mapconcat (lambda (line)
+                 (string-trim-right line))
+               (split-string string "\n")
+               "\n"))
+
+  (defun my/attempt-string-replacement (old-string new-string search-start line-number)
+    "Attempt string replacement with smart whitespace handling.
+    Returns (success . result-message)."
+    (save-excursion
+      (goto-char search-start)
+
+      ;; Strategy 1: Exact match (preserves all whitespace)
+      (if (search-forward old-string nil t)
+          (progn
+            (replace-match new-string t t)
+            (cons t "Success"))
+
+        ;; Strategy 2: Fallback - trim trailing whitespace from old_string
+        (let ((trimmed-old-string (my/trim-trailing-whitespace-multiline old-string)))
+          (if (and (not (string= old-string trimmed-old-string))
+                   (search-forward trimmed-old-string nil t))
+              (progn
+                (replace-match new-string t t)
+                (cons t "Success (matched after trimming trailing whitespace)"))
+
+            (let ((line-content (buffer-substring-no-properties
+                                 search-start (line-end-position))))
+              (cons nil (format "String not found starting at line %d. Line content: '%s'"
+                                line-number line-content))))))))
+
   (defun my/gptel--edit_file (file-path file-edits)
     "In FILE-PATH, apply FILE-EDITS with pattern matching and replacing."
     (if (not (and file-path (not (string= file-path "")) file-edits))
@@ -717,55 +749,53 @@ Behaves like git commit: saving with content submits, saving empty cancels."
                       (setq failed-edits (1+ failed-edits)))
 
                      (t
-                      ;; Attempt the edit - search from line start to end of buffer
+                      ;; Attempt the edit - enhanced replacement with whitespace handling
                       (save-excursion
                         (goto-char (point-min))
                         (forward-line (1- line-number))
-                        (let ((search-start (point)))
-                          (if (search-forward old-string nil t)
+                        (let* ((search-start (point))
+                               (replacement-result (my/attempt-string-replacement
+                                                    old-string new-string search-start line-number)))
+                          (if (car replacement-result)
                               (progn
-                                (replace-match new-string t t)
-                                (setq edit-result "Success")
+                                (setq edit-result (cdr replacement-result))
                                 (setq successful-edits (1+ successful-edits)))
-                            (let ((line-content (buffer-substring-no-properties
-                                                 search-start (line-end-position))))
-                              (setq edit-result (format "String not found starting at line %d. Line content: '%s'"
-                                                        line-number line-content))
-                              (setq failed-edits (1+ failed-edits))))))))
+                            (setq edit-result (cdr replacement-result))
+                            (setq failed-edits (1+ failed-edits)))))))
 
                     ;; Store result for this edit
                     (push (list :line_number line-number
                                 :old_string old-string
                                 :new_string new-string
-                                :result edit-result) edit-results)))
+                                :result edit-result) edit-results))))
 
-                ;; Generate comprehensive result message
-                (let ((summary (if (> successful-edits 0)
-                                   (if (= failed-edits 0)
-                                       (format "Successfully applied all %d edits to %s" successful-edits file-name)
-                                     (format "Applied %d/%d edits to %s" successful-edits (+ successful-edits failed-edits) file-name))
-                                 (format "Failed to apply any edits to %s" file-name))))
+              ;; Generate comprehensive result message
+              (let ((summary (if (> successful-edits 0)
+                                 (if (= failed-edits 0)
+                                     (format "Successfully applied all %d edits to %s" successful-edits file-name)
+                                   (format "Applied %d/%d edits to %s" successful-edits (+ successful-edits failed-edits) file-name))
+                               (format "Failed to apply any edits to %s" file-name))))
 
-                  (if (> failed-edits 0)
-                      ;; Include detailed failure information
-                      (let ((failure-details
-                             (mapconcat (lambda (result)
-                                          (when (not (string= (plist-get result :result) "Success"))
-                                            (format "  Line %d: %s"
-                                                    (plist-get result :line_number)
-                                                    (plist-get result :result))))
-                                        (reverse edit-results) "\n")))
-                        (if (> successful-edits 0)
-                            (progn
-                              ;; Show diffs for partial success
-                              (my/show-edit-diff file-name edit-buffer)
-                              (format "%s\n\nFailed edits:\n%s" summary failure-details))
-                          (format "%s\n\nFailure details:\n%s" summary failure-details)))
+                (if (> failed-edits 0)
+                    ;; Include detailed failure information
+                    (let ((failure-details
+                           (mapconcat (lambda (result)
+                                        (when (not (string= (plist-get result :result) "Success"))
+                                          (format "  Line %d: %s"
+                                                  (plist-get result :line_number)
+                                                  (plist-get result :result))))
+                                      (reverse edit-results) "\n")))
+                      (if (> successful-edits 0)
+                          (progn
+                            ;; Show diffs for partial success
+                            (my/show-edit-diff file-name edit-buffer)
+                            (format "%s\n\nFailed edits:\n%s" summary failure-details))
+                        (format "%s\n\nFailure details:\n%s" summary failure-details)))
 
-                    ;; All edits successful
-                    (progn
-                      (my/show-edit-diff file-name edit-buffer)
-                      summary)))))))))))
+                  ;; All edits successful
+                  (progn
+                    (my/show-edit-diff file-name edit-buffer)
+                    summary))))))))))
 
   (defun my/show-edit-diff (file-name edit-buffer)
     "Show diff between original file and edited version."
