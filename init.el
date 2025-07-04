@@ -496,6 +496,27 @@ nested subdirectory within the project)."
 
   (add-hook 'gptel-mode-hook #'my/gptel-mode-set-project-root)
 
+  (defun my/gptel-context-with-filepath (orig-fun buffer contexts)
+    "Advice for gptel-context--insert-buffer-string to show file paths instead of buffer names.
+
+This advice temporarily replaces buffer names with file paths in the
+context information sent to LLMs. For buffers visiting files, the full
+file path is displayed; for buffers not associated with files (like
+*scratch*), the original buffer name is preserved."
+    (let ((original-buffer-name (symbol-function 'buffer-name)))
+      (unwind-protect
+          (progn
+            (fset 'buffer-name
+                  (lambda (&optional buf)
+                    (let ((buffer (or buf (current-buffer))))
+                      (or (buffer-file-name buffer)
+                          (funcall original-buffer-name buffer)))))
+            (funcall orig-fun buffer contexts))
+        ;; Always restore the original function
+        (fset 'buffer-name original-buffer-name))))
+
+  (advice-add 'gptel-context--insert-buffer-string :around #'my/gptel-context-with-filepath)
+
   ;; Tools
 
   ;; Human
