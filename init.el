@@ -509,8 +509,10 @@ file path is displayed; for buffers not associated with files (like
             (fset 'buffer-name
                   (lambda (&optional buf)
                     (let ((buffer (or buf (current-buffer))))
-                      (or (buffer-file-name buffer)
-                          (funcall original-buffer-name buffer)))))
+                      (let ((file-name (buffer-file-name buffer)))
+                        (if file-name
+                            (abbreviate-file-name file-name)
+                          (funcall original-buffer-name buffer))))))
             (funcall orig-fun buffer contexts))
         ;; Always restore the original function
         (fset 'buffer-name original-buffer-name))))
