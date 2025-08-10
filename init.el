@@ -847,113 +847,6 @@ Behaves like git commit: saving with content submits, saving empty cancels."
               (cons nil (format "String not found starting at line %d. Line content: '%s'"
                                 line-number line-content))))))))
 
-  (defun my/gptel--edit_file (file-path file-edits)
-    "In FILE-PATH, apply FILE-EDITS with pattern matching and replacing."
-    (if (not (and file-path (not (string= file-path "")) file-edits))
-        "Error: Invalid parameters - file-path and file-edits are required"
-
-      (let ((file-name (expand-file-name file-path)))
-        ;; Validation checks
-        (cond
-         ((not (file-exists-p file-name))
-          (format "Error: File does not exist: %s" file-name))
-         ((not (file-readable-p file-name))
-          (format "Error: File is not readable: %s" file-name))
-         ((not (file-writable-p file-name))
-          (format "Error: File is not writable: %s" file-name))
-         (t
-          ;; Proceed with editing
-          (let* ((base-buffer-name (format "*edit-file %s*" (file-name-nondirectory file-name)))
-                 (buffer-name (generate-new-buffer-name base-buffer-name))
-                 (edit-buffer (get-buffer-create buffer-name))
-                 (edit-results '())
-                 (successful-edits 0)
-                 (failed-edits 0))
-
-            (with-current-buffer edit-buffer
-              (condition-case err
-                  (insert-file-contents file-name)
-                (error (format "Error: Failed to read file contents: %s" (error-message-string err))))
-
-              (let ((inhibit-read-only t)
-                    (case-fold-search nil)
-                    (total-lines (count-lines (point-min) (point-max)))
-                    ;; Sort edits by line number in descending order
-                    (sorted-edits (sort (seq-into file-edits 'list)
-                                        (lambda (a b)
-                                          (> (plist-get a :line_number)
-                                             (plist-get b :line_number))))))
-
-                ;; Apply changes from bottom to top
-                (dolist (file-edit sorted-edits)
-                  (let* ((line-number (plist-get file-edit :line_number))
-                         (old-string (plist-get file-edit :old_string))
-                         (new-string (plist-get file-edit :new_string))
-                         (edit-result nil))
-
-                    (cond
-                     ;; Validation checks for each edit
-                     ((not (and line-number old-string new-string))
-                      (setq edit-result "Missing required fields (line_number, old_string, new_string)")
-                      (setq failed-edits (1+ failed-edits)))
-
-                     ((or (<= line-number 0) (> line-number total-lines))
-                      (setq edit-result (format "Line number %d is out of range (1-%d)" line-number total-lines))
-                      (setq failed-edits (1+ failed-edits)))
-
-                     ((string= old-string "")
-                      (setq edit-result "old_string cannot be empty")
-                      (setq failed-edits (1+ failed-edits)))
-
-                     (t
-                      ;; Attempt the edit - enhanced replacement with whitespace handling
-                      (save-excursion
-                        (goto-char (point-min))
-                        (forward-line (1- line-number))
-                        (let* ((search-start (point))
-                               (replacement-result (my/attempt-string-replacement
-                                                    old-string new-string search-start line-number)))
-                          (if (car replacement-result)
-                              (progn
-                                (setq edit-result (cdr replacement-result))
-                                (setq successful-edits (1+ successful-edits)))
-                            (setq edit-result (cdr replacement-result))
-                            (setq failed-edits (1+ failed-edits)))))))
-
-                    ;; Store result for this edit
-                    (push (list :line_number line-number
-                                :old_string old-string
-                                :new_string new-string
-                                :result edit-result) edit-results))))
-
-              ;; Generate comprehensive result message
-              (let ((summary (if (> successful-edits 0)
-                                 (if (= failed-edits 0)
-                                     (format "Successfully applied all %d edits to %s" successful-edits file-name)
-                                   (format "Applied %d/%d edits to %s" successful-edits (+ successful-edits failed-edits) file-name))
-                               (format "Failed to apply any edits to %s" file-name))))
-
-                (if (> failed-edits 0)
-                    ;; Include detailed failure information
-                    (let ((failure-details
-                           (mapconcat (lambda (result)
-                                        (when (not (string= (plist-get result :result) "Success"))
-                                          (format "  Line %d: %s"
-                                                  (plist-get result :line_number)
-                                                  (plist-get result :result))))
-                                      (reverse edit-results) "\n")))
-                      (if (> successful-edits 0)
-                          (progn
-                            ;; Show diffs for partial success
-                            (my/show-edit-diff file-name edit-buffer)
-                            (format "%s\n\nFailed edits:\n%s" summary failure-details))
-                        (format "%s\n\nFailure details:\n%s" summary failure-details)))
-
-                  ;; All edits successful
-                  (progn
-                    (my/show-edit-diff file-name edit-buffer)
-                    summary))))))))))
-
   (defun my/show-edit-diff (file-name edit-buffer)
     "Show diff between original file and edited version."
     (let ((saved-window-config (current-window-configuration))
@@ -967,13 +860,233 @@ Behaves like git commit: saving with content submits, saving empty cancels."
         (add-hook 'ediff-quit-hook cleanup-fn)
         (ediff-buffers original-buffer edit-buffer))))
 
+  (defun my/validate-string-uniqueness (search-string buffer)
+    "Validate that SEARCH-STRING appears exactly once in BUFFER.
+Returns (unique-p . context-info)"
+    (with-current-buffer buffer
+      (save-excursion
+        (goto-char (point-min))
+        (let ((matches '())
+              (match-count 0)
+              (case-fold-search nil))
+
+          ;; Find all matches for exact string
+          (while (search-forward search-string nil t)
+            (setq match-count (1+ match-count))
+            (let* ((match-end (point))
+                   (match-start (- match-end (length search-string)))
+                   (line-number (line-number-at-pos match-start)))
+              (push (cons line-number match-start) matches)))
+
+          ;; If no exact matches, try with trimmed trailing whitespace
+          (when (= match-count 0)
+            (let ((trimmed-search-string (my/trim-trailing-whitespace-multiline search-string)))
+              (when (not (string= search-string trimmed-search-string))
+                (goto-char (point-min))
+                (while (search-forward trimmed-search-string nil t)
+                  (setq match-count (1+ match-count))
+                  (let* ((match-end (point))
+                         (match-start (- match-end (length trimmed-search-string)))
+                         (line-number (line-number-at-pos match-start)))
+                    (push (cons line-number match-start) matches))))))
+
+          (cond
+           ((= match-count 1)
+            ;; Exactly one match - success
+            (cons t nil))
+
+           ((= match-count 0)
+            ;; No matches
+            (cons nil (format "String '%s' not found in file" search-string)))
+
+           (t
+            ;; Multiple matches - collect context
+            (let ((context-info (my/collect-match-context (reverse matches) search-string)))
+              (cons nil (format "Found %d matches for '%s'. Please provide a more specific string.\n\n%s"
+                                match-count search-string context-info)))))))))
+
+  (defun my/collect-match-context (matches search-string)
+    "Collect 2-3 lines of context around each match position.
+MATCHES is a list of (line-number . position) pairs."
+    (mapconcat
+     (lambda (match)
+       (let ((line-number (car match))
+             (position (cdr match)))
+         (save-excursion
+           (goto-char position)
+           (let* ((context-start (save-excursion
+                                   (forward-line -2)
+                                   (point)))
+                  (context-end (save-excursion
+                                 (forward-line 3)
+                                 (point)))
+                  (context-text (buffer-substring-no-properties context-start context-end)))
+             (format "Line %d:\n%s" line-number context-text)))))
+     matches
+     "\n"))
+
+  (defun my/prompt-rejection-reason ()
+    "Prompt user for reason when rejecting changes."
+    (condition-case nil
+        (let ((reason (read-string "Reason for rejecting changes: ")))
+          (if (string= reason "")
+              "No reason provided"
+            reason))
+      (quit "User cancelled reason input")))
+
+  (defun my/setup-ediff-completion-handler (callback summary edit-buffer original-buffer file-name)
+    "Setup ediff quit hook to handle completion and call CALLBACK."
+    (let ((saved-window-config (current-window-configuration)))
+      (letrec ((cleanup-fn
+                (lambda ()
+                  ;; Remove hook first to prevent recursion
+                  (remove-hook 'ediff-quit-hook cleanup-fn)
+
+                  ;; Detect if changes were saved
+                  (let ((changes-saved
+                         (with-current-buffer original-buffer
+                           (not (buffer-modified-p)))))
+
+                    ;; Restore window configuration
+                    (set-window-configuration saved-window-config)
+
+                    ;; Kill the edit buffer
+                    (when (buffer-live-p edit-buffer)
+                      (kill-buffer edit-buffer))
+
+                    ;; Prepare final message and call callback
+                    (if changes-saved
+                        (progn
+                          ;; Save the file - redundant
+                          ;; (with-current-buffer original-buffer
+                          ;;   (save-buffer))
+                          (funcall callback (format "%s\n\nChanges saved to %s" summary file-name)))
+
+                      ;; Changes rejected - prompt for reason
+                      (let ((rejection-reason (my/prompt-rejection-reason)))
+                        (funcall callback (format "Changes rejected by user: %s" rejection-reason))))))))
+
+        ;; Add the cleanup function to ediff quit hook
+        (add-hook 'ediff-quit-hook cleanup-fn))))
+
+  (defun my/gptel--edit_file (callback file-path file-edits)
+    "Asynchronously edit FILE-PATH by applying FILE-EDITS with uniqueness validation."
+    (if (not (and file-path (not (string= file-path "")) file-edits))
+        (funcall callback "Error: Invalid parameters - file-path and file-edits are required")
+
+      (let ((file-name (expand-file-name file-path)))
+        ;; Validation checks
+        (cond
+         ((not (file-exists-p file-name))
+          (funcall callback (format "Error: File does not exist: %s" file-name)))
+         ((not (file-readable-p file-name))
+          (funcall callback (format "Error: File is not readable: %s" file-name)))
+         ((not (file-writable-p file-name))
+          (funcall callback (format "Error: File is not writable: %s" file-name)))
+         (t
+          ;; Proceed with editing
+          (let* ((base-buffer-name (format "*edit-file %s*" (file-name-nondirectory file-name)))
+                 (buffer-name (generate-new-buffer-name base-buffer-name))
+                 (edit-buffer (get-buffer-create buffer-name))
+                 (original-buffer (find-file-noselect file-name))
+                 (edit-results '())
+                 (successful-edits 0)
+                 (failed-edits 0))
+
+            (with-current-buffer edit-buffer
+              (condition-case err
+                  (insert-file-contents file-name)
+                (error (funcall callback (format "Error: Failed to read file contents: %s" (error-message-string err)))
+                       (return)))
+
+              ;; First pass: validate all edits for uniqueness
+              (let ((validation-failed nil)
+                    (edit-index 0))
+
+                (dolist (file-edit (seq-into file-edits 'list))
+                  (let* ((old-string (plist-get file-edit :old_string))
+                         (new-string (plist-get file-edit :new_string)))
+
+                    (cond
+                     ;; Check for required fields
+                     ((not (and old-string new-string))
+                      (funcall callback (format "Error: Missing required fields (old_string, new_string) in edit %d" edit-index))
+                      (setq validation-failed t)
+                      (return))
+
+                     ;; Check for empty old_string
+                     ((string= old-string "")
+                      (funcall callback (format "Error: old_string cannot be empty in edit %d" edit-index))
+                      (setq validation-failed t)
+                      (return))
+
+                     ;; Validate uniqueness
+                     (t
+                      (let ((validation-result (my/validate-string-uniqueness old-string edit-buffer)))
+                        (unless (car validation-result)
+                          (funcall callback (format "Error in edit %d: %s" edit-index (cdr validation-result)))
+                          (setq validation-failed t)
+                          (return)))))
+
+                    (setq edit-index (1+ edit-index))))
+
+                ;; If validation failed, we already called callback, so return
+                (when validation-failed
+                  (when (buffer-live-p edit-buffer)
+                    (kill-buffer edit-buffer))
+                  (return)))
+
+              ;; All validations passed - apply edits sequentially
+              (dolist (file-edit (seq-into file-edits 'list))
+                (let* ((old-string (plist-get file-edit :old_string))
+                       (new-string (plist-get file-edit :new_string)))
+
+                  ;; Apply the edit using the existing replacement function
+                  (save-excursion
+                    (goto-char (point-min))
+                    (let ((replacement-result (my/attempt-string-replacement old-string new-string (point-min) 1)))
+                      (if (car replacement-result)
+                          (progn
+                            (setq successful-edits (1+ successful-edits))
+                            (push (list :old_string old-string
+                                        :new_string new-string
+                                        :result (cdr replacement-result)) edit-results))
+                        (progn
+                          (setq failed-edits (1+ failed-edits))
+                          (push (list :old_string old-string
+                                      :new_string new-string
+                                      :result (cdr replacement-result)) edit-results))))))))
+
+            ;; Generate summary message
+            (let ((summary (if (> successful-edits 0)
+                               (if (= failed-edits 0)
+                                   (format "Successfully applied all %d edits" successful-edits)
+                                 (format "Applied %d/%d edits" successful-edits (+ successful-edits failed-edits)))
+                             "Failed to apply any edits")))
+
+              (if (> successful-edits 0)
+                  ;; Show ediff and wait for completion
+                  (progn
+                    (my/setup-ediff-completion-handler callback summary edit-buffer original-buffer file-name)
+                    (ediff-buffers original-buffer edit-buffer))
+
+                ;; No successful edits - call callback immediately
+                (progn
+                  (when (buffer-live-p edit-buffer)
+                    (kill-buffer edit-buffer))
+                  (let ((failure-details
+                         (mapconcat (lambda (result)
+                                      (format "  %s -> %s: %s"
+                                              (plist-get result :old_string)
+                                              (plist-get result :new_string)
+                                              (plist-get result :result)))
+                                    (reverse edit-results) "\n")))
+                    (funcall callback (format "%s\n\nFailure details:\n%s" summary failure-details))))))))))))
+
   (gptel-make-tool
    :function #'my/gptel--edit_file
    :name "edit_file"
-   :description "Edit file by finding and replacing strings. Supports both single-line
-and multi-line string replacements. Searches forward from the specified
-line number. The old_string must match exactly including whitespace and
-newlines."
+   :description "Edit file by finding and replacing strings. Each old_string must have exactly one match in the file - if multiple matches are found, the tool will fail with context around each match to help you choose a more specific string. Supports both single-line and multi-line string replacements."
    :args (list '(:name "file-path"
                        :type string
                        :description "The full path of the file to edit")
@@ -981,14 +1094,13 @@ newlines."
                        :type array
                        :items (:type object
                                      :properties
-                                     (:line_number
-                                      (:type integer :description "Line number where search begins (1-based)")
-                                      :old_string
-                                      (:type string :description "Exact string to find and replace")
+                                     (:old_string
+                                      (:type string :description "Exact string to find and replace (must be unique in file)")
                                       :new_string
                                       (:type string :description "Replacement string")))
                        :description "List of edits to apply"))
    :category "filesystem"
+   :async t
    :confirm t)
 
   (defun my/run_async_command (callback command)
