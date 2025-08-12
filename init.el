@@ -1258,7 +1258,264 @@ MATCHES is a list of (line-number . position) pairs."
                '(:name "max_results"
                        :type integer
                        :description "Optional maximum number of results per file"))
-   :category "code-search"))
+   :category "code-search")
+
+  ;; Tmux Interaction Tools
+
+  ;; Variables
+  (defvar my/tmux-session-name "emacs-llm-session"
+    "Name of the persistent tmux session for LLM interactions.")
+
+  (defvar my/tmux-last-marker nil
+    "Last completion marker used for command detection.")
+
+  (defvar my/tmux-default-lines 50
+    "Default number of lines to return from tmux output.")
+
+  (defvar my/tmux-default-wait-time 10
+    "Default wait time in seconds for tmux_send operations.")
+
+  (defvar my/tmux-read-default-wait-time 2
+    "Default wait time in seconds for tmux_read operations.")
+
+  (defvar my/tmux-max-output-size 10240
+    "Maximum output size in characters to prevent context overflow.")
+
+  ;; Session management
+  (defun my/tmux-session-exists-p ()
+    "Check if the tmux session exists."
+    (= 0 (call-process "tmux" nil nil nil "has-session" "-t" my/tmux-session-name)))
+
+  (defun my/tmux-create-session ()
+    "Create a new tmux session with zsh."
+    (let ((result (call-process "tmux" nil nil nil
+                                "new-session" "-d" "-s" my/tmux-session-name
+                                "/usr/bin/zsh")))
+      (= 0 result)))
+
+  (defun my/tmux-ensure-session ()
+    "Ensure tmux session exists, create if necessary."
+    (unless (my/tmux-session-exists-p)
+      (unless (my/tmux-create-session)
+        (error "Failed to create tmux session: %s" my/tmux-session-name))))
+
+  (defun my/tmux-cleanup-session ()
+    "Clean up tmux session on Emacs exit."
+    (when (my/tmux-session-exists-p)
+      (call-process "tmux" nil nil nil "kill-session" "-t" my/tmux-session-name)))
+
+  ;; Output processing
+  (defun my/tmux-strip-ansi (text)
+    "Remove ANSI escape sequences from TEXT."
+    (replace-regexp-in-string "\x1b\\[[0-9;]*[mGKHJABCDEFghlnrstuv]" "" text))
+
+  (defun my/tmux-clean-output (output)
+    "Remove all tmux interaction artifacts from OUTPUT.
+This includes:
+- EMACS_MARKER=....; prefix
+- ; echo \"COMPLETED: ...\" suffix
+- COMPLETED: EMACS_MARKER_... lines"
+    (let ((cleaned output))
+      ;; Remove EMACS_MARKER=EMACS_MARKER_XXXXXXXXX_XXXX; prefix
+      (setq cleaned (replace-regexp-in-string
+                     "EMACS_MARKER=EMACS_MARKER_[0-9_]+; " "" cleaned))
+
+      ;; Remove ; echo "COMPLETED: $EMACS_MARKER" suffix
+      (setq cleaned (replace-regexp-in-string
+                     "; echo \"COMPLETED: \\$EMACS_MARKER\"" "" cleaned))
+
+      ;; Remove COMPLETED: EMACS_MARKER_XXXXXXXXX_XXXX lines
+      (setq cleaned (replace-regexp-in-string
+                     ".*COMPLETED: EMACS_MARKER_[0-9_]+.*\n?" "" cleaned))
+
+      cleaned))
+
+  (defun my/tmux-capture-output (&optional lines)
+    "Capture and process tmux pane output."
+    (let ((lines (or lines my/tmux-default-lines))
+          (temp-buffer (generate-new-buffer " *tmux-capture*")))
+      (unwind-protect
+          (progn
+            (let ((result (call-process "tmux" nil temp-buffer nil
+                                        "capture-pane" "-t" my/tmux-session-name
+                                        "-p" "-S" (format "-%d" lines))))
+              (if (= 0 result)
+                  (with-current-buffer temp-buffer
+                    (let ((output (buffer-substring-no-properties (point-min) (point-max))))
+                      (my/tmux-strip-ansi output)))
+                (error "Failed to capture tmux output"))))
+        (kill-buffer temp-buffer))))
+
+  (defun my/tmux-send-text (text)
+    "Send TEXT to the tmux session."
+    (let ((result (call-process "tmux" nil nil nil
+                                "send-keys" "-t" my/tmux-session-name
+                                text "Enter")))
+      (= 0 result)))
+
+  (defun my/tmux-send-text-no-enter (text)
+    "Send TEXT to the tmux session without pressing Enter."
+    (let ((result (call-process "tmux" nil nil nil
+                                "send-keys" "-t" my/tmux-session-name
+                                text)))
+      (= 0 result)))
+
+  ;; Password detection and handling
+  (defun my/tmux-detect-password-prompt (output)
+    "Detect if OUTPUT contains a password prompt."
+    (string-match-p "\\(?:[Pp]assword\\|[Pp]assphrase\\).*:" output))
+
+  (defun my/tmux-handle-password-prompt (callback)
+    "Handle password prompt by requesting user input."
+    (let ((password (read-passwd "Password required for tmux command: ")))
+      (when password
+        (my/tmux-send-text-no-enter password)
+        (my/tmux-send-text-no-enter "")  ; Send Enter
+        (setq password nil)  ; Clear password
+        ;; Wait a bit and then capture output
+        (run-with-timer 1 nil
+                        (lambda ()
+                          (let ((output (my/tmux-capture-output my/tmux-default-lines)))
+                            (funcall callback (format "Password provided. Current output:\n%s" output))))))))
+
+  ;; Command completion detection
+  (defun my/tmux-generate-marker ()
+    "Generate a unique completion marker."
+    (format "EMACS_MARKER_%s_%d"
+            (format-time-string "%s")
+            (random 10000)))
+
+  (defun my/tmux-check-for-marker (marker)
+    "Check if MARKER appears in current tmux output."
+    (let ((output (my/tmux-capture-output 10)))  ; Check last 10 lines for marker
+      (string-match-p (regexp-quote (concat "COMPLETED: " marker)) output)))
+
+  (defun my/tmux-wait-for-completion (marker wait-time callback lines)
+    "Wait for completion marker or timeout, then call CALLBACK."
+    (let ((start-time (current-time))
+          (poll-timer nil))
+      (setq poll-timer
+            (run-with-timer
+             0.1 0.1
+             (lambda ()
+               (let ((elapsed (float-time (time-subtract (current-time) start-time))))
+                 (cond
+                  ;; Marker found - command completed
+                  ((my/tmux-check-for-marker marker)
+                   (cancel-timer poll-timer)
+                   (let ((output (my/tmux-capture-output lines)))
+                     ;; Remove the marker line from output
+                     (setq output (my/tmux-clean-output output))
+                     (funcall callback (my/tmux-format-output output "completed" lines))))
+
+                  ;; Timeout reached
+                  ((>= elapsed wait-time)
+                   (cancel-timer poll-timer)
+                   (let ((output (my/tmux-capture-output lines)))
+                     (if (my/tmux-detect-password-prompt output)
+                         (my/tmux-handle-password-prompt callback)
+                       (funcall callback (my/tmux-format-output
+                                          output "timeout" lines
+                                          (format "Command timed out after %d seconds. Use tmux_read to check current status." wait-time)))))))))))))
+
+  ;; Output formatting
+  (defun my/tmux-format-output (output status lines &optional message)
+    "Format output with metadata."
+    (let* ((output-lines (split-string output "\n"))
+           (actual-lines (length (remove "" output-lines)))
+           (truncated (> (length output) my/tmux-max-output-size))
+           (final-output (if truncated
+                             (substring output 0 my/tmux-max-output-size)
+                           output)))
+      (concat
+       (when message (concat message "\n\n"))
+       "=== Command Output ===\n"
+       final-output
+       (when (string-suffix-p "\n" final-output) "" "\n")
+       "\n=== Status ===\n"
+       (format "Status: %s\nLines returned: %d\nTruncated: %s"
+               status actual-lines truncated))))
+
+  ;; Main tool functions
+  (defun my/tmux-send-command (callback text &optional lines wait-time)
+    "Send TEXT to tmux session and return output via CALLBACK."
+    (condition-case error
+        (progn
+          (my/tmux-ensure-session)
+          (let ((lines (or lines my/tmux-default-lines))
+                (wait-time (or wait-time my/tmux-default-wait-time))
+                (marker (my/tmux-generate-marker)))
+
+            (setq my/tmux-last-marker marker)
+
+            ;; Send the command with completion marker (EMACS_MARKER used as a way to avoid regexp matching the string)
+            (unless (my/tmux-send-text (format "EMACS_MARKER=%s; %s; echo \"COMPLETED: $EMACS_MARKER\"" marker text))
+              (error "Failed to send command to tmux"))
+
+            ;; Wait for completion
+            (my/tmux-wait-for-completion marker wait-time callback lines)))
+      (error
+       (funcall callback (format "Error in tmux_send: %s" error)))))
+
+  (defun my/tmux-read-output (callback &optional lines wait-time)
+    "Read current tmux output and return via CALLBACK."
+    (condition-case error
+        (progn
+          (my/tmux-ensure-session)
+          (let ((lines (or lines my/tmux-default-lines))
+                (wait-time (or wait-time my/tmux-read-default-wait-time)))
+
+            ;; Simple wait then capture
+            (run-with-timer
+             wait-time nil
+             (lambda ()
+               (let ((output (my/tmux-capture-output lines)))
+                 ;; Remove the marker line from output
+                 (setq output (my/tmux-clean-output output))
+                 (if (my/tmux-detect-password-prompt output)
+                     (my/tmux-handle-password-prompt callback)
+                   (funcall callback (my/tmux-format-output output "read" lines))))))))
+      (error
+       (funcall callback (format "Error in tmux_read: %s" error)))))
+
+  ;; Cleanup hook
+  (add-hook 'kill-emacs-hook #'my/tmux-cleanup-session)
+
+  ;; Tool definitions
+  (gptel-make-tool
+   :function #'my/tmux-send-command
+   :name "tmux_send"
+   :description "Send command or text to persistent tmux session and return output. Use this for executing commands and interacting with processes. For commands that take longer than expected, use tmux_read with appropriate wait_time rather than re-running commands."
+   :args (list
+          '(:name "text"
+                  :type "string"
+                  :description "Command or text to send to the shell")
+          '(:name "lines"
+                  :type "integer"
+                  :description "Maximum number of output lines to return (default: 50). Tool returns only actual output lines if fewer than requested.")
+          '(:name "wait_time"
+                  :type "integer"
+                  :description "Maximum seconds to wait before capturing output (default: 10). Tool returns early if discrete command completes."))
+   :category "shell"
+   :async t
+   :include t
+   :confirm t)
+
+  (gptel-make-tool
+   :function #'my/tmux-read-output
+   :name "tmux_read"
+   :description "Read current output from tmux session without sending commands. Use this when you need to check output after waiting longer, or when you need more lines than initially captured. Prefer single tmux_read with appropriate wait_time over multiple rapid calls."
+   :args (list
+          '(:name "lines"
+                  :type "integer"
+                  :description "Maximum number of output lines to return (default: 50)")
+          '(:name "wait_time"
+                  :type "integer"
+                  :description "Seconds to wait before capturing output (default: 2)"))
+   :category "shell"
+   :async t
+   :include t
+   :confirm t))
 
 (use-package gptel-gh
   :after gptel
