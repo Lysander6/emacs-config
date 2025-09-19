@@ -1572,10 +1572,14 @@ This includes:
   :ensure t
   :hook after-init)
 
-(use-package markdown-mode
-  :ensure t
-  :pin melpa
-  :mode ("\\.md\\'" . gfm-mode))
+;; (use-package markdown-mode
+;;   :ensure t
+;;   :pin melpa
+;;   :mode ("\\.md\\'" . gfm-mode))
+
+(use-package markdown-ts-mode
+  :config
+  (add-to-list 'markdown-ts--code-block-language-map '("js" . javascript)))
 
 (use-package mcp-hub
   :ensure t
