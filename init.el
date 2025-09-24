@@ -1579,7 +1579,8 @@ This includes:
 
 (use-package markdown-ts-mode
   :config
-  (add-to-list 'markdown-ts--code-block-language-map '("js" . javascript)))
+  (add-to-list 'markdown-ts--code-block-language-map '("js" . javascript))
+  (add-to-list 'markdown-ts--code-block-language-map '("scss" . css)))
 
 (use-package mcp-hub
   :ensure t
