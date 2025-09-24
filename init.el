@@ -1602,7 +1602,20 @@ This includes:
               tools)))
 
   ;; TODO: seems that it should be called only after servers are running
-  (gptel-mcp-register-tool))
+  (gptel-mcp-register-tool)
+
+  ;; Fix issue with encoding confusion:
+  ;; error in process filter: mcp--process-filter: invalid utf-8 encoding: 1, nil, 1768
+  ;; error in process filter: invalid utf-8 encoding: 1, nil, 1768
+  (defun my/mcp-utf8-fix (orig-fun proc string)
+    "Fix UTF-8 decoding for stdio connections."
+    (when (and (process-get proc 'jsonrpc-connection)
+               (equal 'stdio (mcp--connection-type (process-get proc 'jsonrpc-connection))))
+      ;; For stdio, decode the string properly before passing it along
+      (setq string (decode-coding-string (encode-coding-string string 'binary) 'utf-8)))
+    (funcall orig-fun proc string))
+
+  (advice-add 'mcp--process-filter :around #'my/mcp-utf8-fix))
 
 (use-package modus-themes
   :config
