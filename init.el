@@ -1737,6 +1737,7 @@ This includes:
             (typescript . ("https://github.com/tree-sitter/tree-sitter-typescript" "master" "typescript/src"))
             (yaml "https://github.com/tree-sitter-grammars/tree-sitter-yaml")))
 
+  (add-to-list 'auto-mode-alist '("\\.astro\\'" . astro-ts-mode))
   (add-to-list 'auto-mode-alist '("\\.go\\'" . go-ts-mode))
   (add-to-list 'auto-mode-alist '("\\.jqtpl\\'" . html-ts-mode))
   (add-to-list 'auto-mode-alist '("\\.js\\'" . js-ts-mode))
