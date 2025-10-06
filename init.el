@@ -1711,6 +1711,7 @@ This includes:
   :config
   (setopt treesit-language-source-alist
           '((astro "https://github.com/virchau13/tree-sitter-astro")
+            (bash "https://github.com/tree-sitter/tree-sitter-bash")
             (css "https://github.com/tree-sitter/tree-sitter-css")
             (go "https://github.com/tree-sitter/tree-sitter-go")
             (gomod "https://github.com/camdencheek/tree-sitter-go-mod")
