@@ -1524,7 +1524,7 @@ This includes:
   :custom
   (gptel-backend (gptel-make-gh-copilot "Github Copilot"
                    :host "api.business.githubcopilot.com"))
-  (gptel-model 'claude-sonnet-4))
+  (gptel-model 'claude-sonnet-4.5))
 
 ;; Built-in code folding
 (use-package hideshow
