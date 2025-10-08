@@ -1526,6 +1526,9 @@ This includes:
                    :host "api.business.githubcopilot.com"))
   (gptel-model 'claude-sonnet-4.5))
 
+(use-package gptel-integrations
+  :after gptel)
+
 ;; Built-in code folding
 (use-package hideshow
   :hook (prog-mode . hs-minor-mode))
@@ -1592,18 +1595,7 @@ This includes:
             :branch "master")
   :custom
   (mcp-hub-servers
-   '(("filesystem" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-filesystem" "/home/")))))
-  :config
-  (defun gptel-mcp-register-tool ()
-    (interactive)
-    (let ((tools (mcp-hub-get-all-tool :asyncp t :categoryp t)))
-      (mapcar #'(lambda (tool)
-                  (apply #'gptel-make-tool
-                         tool))
-              tools)))
-
-  ;; TODO: seems that it should be called only after servers are running
-  (gptel-mcp-register-tool))
+   '(("filesystem" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-filesystem" "/home/"))))))
 
 (use-package modus-themes
   :config
