@@ -1586,13 +1586,11 @@ This includes:
   (add-to-list 'markdown-ts--code-block-language-map '("js" . javascript))
   (add-to-list 'markdown-ts--code-block-language-map '("scss" . css)))
 
-(use-package mcp-hub
+(use-package mcp
   :ensure t
+  :pin melpa
   :after gptel
   :defer t
-  :vc (:url "https://github.com/lizqwerscott/mcp.el"
-            :rev :newest
-            :branch "master")
   :custom
   (mcp-hub-servers
    '(("filesystem" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-filesystem" "/home/"))))))
