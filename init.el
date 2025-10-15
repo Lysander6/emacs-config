@@ -245,7 +245,17 @@ User selects namespace from a fixed list, then chooses a repository to clone."
       :inlayHints ( :maxLength 120
                     :closureReturnTypeHints (:enable t)
                     :lifetimeElisionHints (:enable t :useParameterNames t)
-                    :implicitDrops (:enable t))))))
+                    :implicitDrops (:enable t)))))
+  :config
+  (add-to-list 'eglot-server-programs
+               '(astro-ts-mode . ("npx"
+                                  "--package=@astrojs/language-server"
+                                  "astro-ls"
+                                  "--stdio"
+                                  ;; source: https://github.com/neovim/neovim/discussions/33266
+                                  :initializationOptions
+                                  ( :typescript
+                                    ( :tsdk "./node_modules/typescript/lib" ))))))
 
 (use-package elec-pair
   :hook ((text-mode . electric-pair-mode)
