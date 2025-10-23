@@ -1534,7 +1534,7 @@ This includes:
   :custom
   (gptel-backend (gptel-make-gh-copilot "Github Copilot"
                    :host "api.business.githubcopilot.com"))
-  (gptel-model 'claude-sonnet-4.5))
+  (gptel-model 'claude-haiku-4.5))
 
 (use-package gptel-integrations
   :after gptel)
