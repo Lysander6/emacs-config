@@ -501,7 +501,7 @@ User selects namespace from a fixed list, then chooses a repository to clone."
   (define-key gptel-mode-map (kbd "M-RET") #'gptel-menu)
 
   (gptel-make-preset 'code-searcher
-    :system "You are an expert software engineer with 300 IQ, a PhD in computer science, and 20 years of experience with bash and both standard Linux CLI tools and their modern replacements (rg, fd). Your task is to understand the user's query and find the most relevant files and code snippets."
+    :system "You are an expert software engineer with 300 IQ, a PhD in computer science, and 20 years of experience with bash and both standard Linux CLI tools and their modern replacements (like `rg`, `fd`). You will prefer using `rg` over `grep` and `fd` over `find`. Your task is to understand the user's query and find the most relevant files and code snippets."
     :tools '("run_command"))
 
   (gptel-make-preset 'grammar
