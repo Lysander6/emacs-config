@@ -99,6 +99,11 @@
                '("melpa" . "https://melpa.org/packages/"))
   (package-initialize t))
 
+(use-package agent-shell
+  :ensure t
+  :pin melpa
+  :defer t)
+
 (use-package astro-ts-mode
   :ensure t
   :pin melpa
