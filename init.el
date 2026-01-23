@@ -168,15 +168,18 @@
   "The GitHub organization to search repositories in.")
 
 (defvar consult-gh-repo-action)
+(defvar consult-gh-search-repos-args)
 
 (defun my/github-clone-repo-from-namespace ()
   "Clone a repository from a selected namespace in GitHub organization.
 User selects namespace from a fixed list, then chooses a repository to clone."
   (interactive)
   (let* ((namespace (completing-read "Select namespace: " my/github-namespaces nil t))
-         (query-string (format "props.namespace:%s -- --owner %s --limit 300#"
-                               namespace
-                               my/github-organization))
+         (consult-gh-search-repos-args `("search" "repos"
+                                         "--include-forks" "true"
+                                         "--owner" ,my/github-organization
+                                         "--limit" "300"))
+         (query-string (format "props.namespace:%s#" namespace))
          (consult-gh-repo-action #'consult-gh--repo-clone-action))
     (consult-gh-search-repos query-string)))
 
