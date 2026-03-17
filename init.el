@@ -1726,6 +1726,10 @@ This includes:
   (tab-bar-tab-hints t)
   (tab-bar-select-tab-modifiers '(meta)))
 
+(use-package transient
+  :ensure t
+  :pin melpa)
+
 (use-package treesit
   :config
   (setopt treesit-language-source-alist
