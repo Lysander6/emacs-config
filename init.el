@@ -1610,11 +1610,6 @@ This includes:
 ;;   :pin melpa
 ;;   :mode ("\\.md\\'" . gfm-mode))
 
-(use-package markdown-ts-mode
-  :config
-  (add-to-list 'markdown-ts--code-block-language-map '("js" . javascript))
-  (add-to-list 'markdown-ts--code-block-language-map '("scss" . css)))
-
 (use-package mcp
   :ensure t
   :pin melpa
