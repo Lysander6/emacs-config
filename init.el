@@ -613,11 +613,6 @@ file path is displayed; for buffers not associated with files (like
   :ensure t
   :hook after-init)
 
-;; (use-package markdown-mode
-;;   :ensure t
-;;   :pin melpa
-;;   :mode ("\\.md\\'" . gfm-mode))
-
 (use-package mcp
   :ensure t
   :pin melpa
@@ -753,18 +748,7 @@ file path is displayed; for buffers not associated with files (like
   :ensure t
   :hook after-init
   :custom
-  (winum-auto-setup-mode-line t)
-  ;; :bind (("M-1" . winum-select-window-1)
-  ;;        ("M-2" . winum-select-window-2)
-  ;;        ("M-3" . winum-select-window-3)
-  ;;        ("M-4" . winum-select-window-4)
-  ;;        ("M-5" . winum-select-window-5)
-  ;;        ("M-6" . winum-select-window-6)
-  ;;        ("M-7" . winum-select-window-7)
-  ;;        ("M-8" . winum-select-window-8)
-  ;;        ("M-9" . winum-select-window-9)
-  ;;        ("M-0" . winum-select-window-0-or-10))
-  )
+  (winum-auto-setup-mode-line t))
 
 (use-package xref
   :custom
