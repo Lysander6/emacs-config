@@ -506,7 +506,7 @@ This ensures that commands run from gptel buffers use the project root
 as their current working directory, rather than inheriting the working
 directory from the buffer where gptel was invoked (which might be a
 nested subdirectory within the project)."
-    (when-let ((project (project-current)))
+    (when-let* ((project (project-current)))
       (setq default-directory (project-root project))))
 
   (add-hook 'gptel-mode-hook #'my/gptel-mode-set-project-root)
