@@ -480,92 +480,6 @@ User selects namespace from a fixed list, then chooses a repository to clone."
 ;;         :foreground
 ;;         ,(face-attribute 'modus-themes-fg-red-faint :foreground))))))
 
-(use-package gptel
-  :ensure t
-  :pin melpa
-  :defer t
-  :custom
-  (gptel-use-tools t)
-  :config
-  (setq gptel-expert-commands t)
-  (define-key gptel-mode-map (kbd "S-<return>") nil)
-  (define-key gptel-mode-map (kbd "<visual-state> S-<return>") nil)
-  (define-key gptel-mode-map (kbd "<normal-state> S-<return>") nil)
-  (define-key gptel-mode-map (kbd "S-RET") nil)
-  (define-key gptel-mode-map (kbd "<visual-state> S-RET") nil)
-  (define-key gptel-mode-map (kbd "<normal-state> S-RET") nil)
-
-  (define-key gptel-mode-map (kbd "M-<return>") #'gptel-menu)
-  (define-key gptel-mode-map (kbd "M-RET") #'gptel-menu)
-  
-
-  (defun my/gptel-mode-set-project-root ()
-    "Set default-directory to project root when gptel-mode is enabled.
-
-This ensures that commands run from gptel buffers use the project root
-as their current working directory, rather than inheriting the working
-directory from the buffer where gptel was invoked (which might be a
-nested subdirectory within the project)."
-    (when-let* ((project (project-current)))
-      (setq default-directory (project-root project))))
-
-  (add-hook 'gptel-mode-hook #'my/gptel-mode-set-project-root)
-
-  (defun my/gptel-context-with-filepath (orig-fun buffer contexts)
-    "Advice for gptel-context--insert-buffer-string to show file paths instead of buffer names.
-
-This advice temporarily replaces buffer names with file paths in the
-context information sent to LLMs. For buffers visiting files, the full
-file path is displayed; for buffers not associated with files (like
-*scratch*), the original buffer name is preserved."
-    (let ((original-buffer-name (symbol-function 'buffer-name)))
-      (unwind-protect
-          (progn
-            (fset 'buffer-name
-                  (lambda (&optional buf)
-                    (let ((buffer (or buf (current-buffer))))
-                      (let ((file-name (buffer-file-name buffer)))
-                        (if file-name
-                            (abbreviate-file-name file-name)
-                          (funcall original-buffer-name buffer))))))
-            (funcall orig-fun buffer contexts))
-        ;; Always restore the original function
-        (fset 'buffer-name original-buffer-name))))
-
-  (advice-add 'gptel-context--insert-buffer-string :around #'my/gptel-context-with-filepath)
-
-  ;; Tools
-
-  ;; Web Tools
-
-  (gptel-make-tool
-   :function (lambda (url)
-               (with-current-buffer (url-retrieve-synchronously url)
-                 (goto-char (point-min))
-                 (forward-paragraph)
-                 (let ((dom (libxml-parse-html-region (point) (point-max))))
-                   (run-at-time 0 nil #'kill-buffer (current-buffer))
-                   (with-temp-buffer
-                     (shr-insert-document dom)
-                     (buffer-substring-no-properties (point-min) (point-max))))))
-   :name "read_url"
-   :description "Fetch and read the contents of a URL"
-   :args (list '(:name "url"
-                       :type string
-                       :description "The URL to read"))
-   :category "web"))
-
-(use-package gptel-gh
-  :after gptel
-  :defer t
-  :custom
-  (gptel-backend (gptel-make-gh-copilot "Github Copilot"
-                   :host "api.business.githubcopilot.com"))
-  (gptel-model 'claude-haiku-4.5))
-
-(use-package gptel-integrations
-  :after gptel)
-
 ;; Built-in code folding
 (use-package hideshow
   :hook (prog-mode . hs-minor-mode))
@@ -612,15 +526,6 @@ file path is displayed; for buffers not associated with files (like
 (use-package marginalia
   :ensure t
   :hook after-init)
-
-(use-package mcp
-  :ensure t
-  :pin melpa
-  :after gptel
-  :defer t
-  :custom
-  (mcp-hub-servers
-   '(("filesystem" . (:command "npx" :args ("-y" "@modelcontextprotocol/server-filesystem" "/home/"))))))
 
 (use-package modus-themes
   :config
@@ -672,14 +577,6 @@ file path is displayed; for buffers not associated with files (like
 
 (use-package savehist
   :hook after-init)
-
-;; (use-package smartparens
-;;   :ensure t
-;;   :pin melpa
-;;   :hook (text-mode prog-mode))
-
-;; (use-package smartparens-config
-;;   :after smartparens)
 
 (use-package tab-bar
   :defer t
